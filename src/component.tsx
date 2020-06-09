@@ -74,7 +74,7 @@ export class ReactCircleCard extends React.Component<{}, State>{
                 <p>
                     {textLabel}
                     <br/>
-                    <em>{textValue}</em>
+                    <em>{textValue} hrm</em>
                 </p>
             </div>
         )

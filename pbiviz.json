@@ -5,14 +5,14 @@
         "guid":"reactCircleCardF6C87CAA832A42FBBFBF7E66B8C15578",
         "visualClassName":"Visual",
         "version":"1.0.0",
-        "description":"",
-        "supportUrl":"",
+        "description":"Circle Card",
+        "supportUrl":"https://www.google.com",
         "gitHubUrl":""
     },
     "apiVersion":"2.5.0",
     "author":{
-        "name":"",
-        "email":""
+        "name":"Andrew Ringler",
+        "email":"aringler@payette.com"
     },
     "assets":{
         "icon":"assets/icon.png"
