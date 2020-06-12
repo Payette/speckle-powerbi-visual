@@ -95,11 +95,29 @@ export default class SpeckleRenderer extends EE {
     this.shadowLight.shadow.camera.near = 0.5; // default
     this.shadowLight.shadow.camera.far = 500;
 
-    this.camera = new THREE.PerspectiveCamera( 75, this.domObject.offsetWidth / this.domObject.offsetHeight, 0.1, 100000 );
-    this.camera.up.set( 0, 0, 1 )
-    this.camera.position.z = 250
-    this.camera.position.y = 250
-    this.camera.position.x = 250
+    // DEFAULT
+    // this.camera = new THREE.PerspectiveCamera( 75, this.domObject.offsetWidth / this.domObject.offsetHeight, 0.1, 100000 );
+    // this.camera.up.set( 0, 0, 1 )
+    // this.camera.position.z = 250
+    // this.camera.position.y = 250
+    // this.camera.position.x = 250
+
+    // Fake Ortho
+    this.camera = new THREE.PerspectiveCamera( 1, this.domObject.offsetWidth / this.domObject.offsetHeight, 0.1, 100000 );
+    this.resetCamera()
+
+    // NOT WORKING OrthographicCamera
+    // this.camera = new THREE.OrthographicCamera(
+    //   this.domObject.offsetWidth / -2,
+    //   this.domObject.offsetWidth / 2,
+    //   this.domObject.offsetHeight / 2,
+    //   this.domObject.offsetHeight / -2,
+    //   0.1, 100000
+    // );
+    // this.camera.up.set( 0, 0, 1 )
+    // this.camera.position.z = 250
+    // this.camera.position.y = 250
+    // this.camera.position.x = 250
 
     this.camera.isCurrent = true
 
@@ -110,6 +128,8 @@ export default class SpeckleRenderer extends EE {
     this.controls = new OrbitControls( this.camera, this.renderer.domElement )
     this.controls.enabled = true
     this.controls.screenSpacePanning = true
+    this.controls.enablePan = true
+    this.controls.enableRotate = false
 
     // this.controls.minPolarAngle = 0;
     // this.controls.maxPolarAngle = Math.PI / 2;
@@ -160,6 +180,13 @@ export default class SpeckleRenderer extends EE {
       } )
       this.setFar()
     }.bind( this ), 200 ) )
+  }
+
+  resetCamera() {
+    this.camera.up.set( 0, 0, 1 )
+    this.camera.position.z = 250
+    this.camera.position.y = 250
+    this.camera.position.x = 250
   }
 
   animate( ) {

@@ -4,6 +4,11 @@
             "displayName": "Speckle Stream URL",
             "name": "specklestreamurl",
             "kind": "Measure"
+        },
+        {
+            "displayName": "Rooms",
+            "name": "rooms",
+            "kind": "Measure"
         }
     ],
     "objects": {
