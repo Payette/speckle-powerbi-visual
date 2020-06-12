@@ -47,13 +47,23 @@ export class Visual implements IVisual {
             this.settings = VisualSettings.parse(dataView) as VisualSettings;
             const object = this.settings.circle;
             
+            var speckleStreamURL = undefined
+            try {
+                if(dataView && dataView.single && dataView.single.value) {
+                    const url = new URL(dataView.single.value.toString())
+                    speckleStreamURL = url.toString()
+                }
+            } catch (error) {
+                console.error("Invalid URL for Speckle Stream", error)
+            }
+
             ReactCircleCard.update({
                 width,
                 height,
                 borderWidth: object && object.circleThickness ? object.circleThickness : undefined,
                 background: object && object.circleColor ? object.circleColor : undefined,
                 textLabel: dataView.metadata.columns[0].displayName,
-                textValue: dataView.single.value.toString()
+                speckleStreamURL: speckleStreamURL
             });
         } else {
             this.clear();

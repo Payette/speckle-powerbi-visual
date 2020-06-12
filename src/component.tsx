@@ -11,7 +11,7 @@ import { ViewerSettings } from "./settings";
 
 export interface State {
     textLabel: string,
-    textValue: string,
+    speckleStreamURL: string,
     width: number,
     height: number,
     background?: string,
@@ -20,7 +20,7 @@ export interface State {
 
 export const initialState: State = {
     textLabel: "",
-    textValue: "",
+    speckleStreamURL: "",
     width: 200,
     height: 200
 }
@@ -55,15 +55,15 @@ export class ReactCircleCard extends React.Component<{}, State>{
     componentDidMount() {
         this.renderer = new SpeckleRenderer( { domObject: this.mount }, ViewerSettings )
         this.renderer.animate( )
-        this.grabSpeckleObjectsFromURLAndUpdate(this.state.textValue)
+        this.grabSpeckleObjectsFromURLAndUpdate(this.state.speckleStreamURL)
     }
 
     componentDidUpdate(prevProps, prevState) {
         if(this.state.width !== prevState.width || this.state.height !== prevState.height) {
             this.renderer.resizeCanvas()
         }
-        if(this.state.textValue !== prevState.textValue) {
-            this.grabSpeckleObjectsFromURLAndUpdate(this.state.textValue)
+        if(this.state.speckleStreamURL !== prevState.speckleStreamURL) {
+            this.grabSpeckleObjectsFromURLAndUpdate(this.state.speckleStreamURL)
         }
     }
 
@@ -74,9 +74,6 @@ export class ReactCircleCard extends React.Component<{}, State>{
             fetch(url)
             .then(response => response.json())
             .then(data => {
-                console.log("got data from url");
-                console.log(data)
-
                 let objs = data.resources;
                 self.renderer.unloadAllObjects()
                 self.renderer.loadObjects( { objs: objs, zoomExtents: true } )               
@@ -88,7 +85,7 @@ export class ReactCircleCard extends React.Component<{}, State>{
     }
 
     render(){
-        const { textLabel, textValue, width, height, background, borderWidth } = this.state;
+        const { textLabel, speckleStreamURL, width, height, background, borderWidth } = this.state;
 
         const style: React.CSSProperties = { width: width, height: height, background, borderWidth, backgroundColor: "pink" };
 

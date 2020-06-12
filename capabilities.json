@@ -1,8 +1,8 @@
 {
     "dataRoles": [
         {
-            "displayName": "Measure Data",
-            "name": "measure",
+            "displayName": "Speckle Stream URL",
+            "name": "specklestreamurl",
             "kind": "Measure"
         }
     ],
@@ -34,7 +34,7 @@
     "dataViewMappings": [
         {
             "single": {
-                "role": "measure"
+                "role": "specklestreamurl"
             }
         }
     ]
