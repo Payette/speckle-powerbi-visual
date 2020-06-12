@@ -1,34 +1,19 @@
 /*
-*  Power BI Visual CLI
-*
-*  Copyright (c) Microsoft Corporation
-*  All rights reserved.
-*  MIT License
-*
-*  Permission is hereby granted, free of charge, to any person obtaining a copy
-*  of this software and associated documentation files (the ""Software""), to deal
-*  in the Software without restriction, including without limitation the rights
-*  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-*  copies of the Software, and to permit persons to whom the Software is
-*  furnished to do so, subject to the following conditions:
-*
-*  The above copyright notice and this permission notice shall be included in
-*  all copies or substantial portions of the Software.
-*
-*  THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-*  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-*  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-*  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-*  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-*  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-*  THE SOFTWARE.
-*/
+ *  Power BI Visualizations
+ *  Copyright (c) Microsoft Corporation
+ *  All rights reserved.
+ *  MIT License
+ */
 import * as React from "react";
+import SpeckleRenderer from './SpeckleRenderer.js'
+import exampleobjects from './speckleshapes.js'
+import { ViewerSettings } from "./settings";
 
 export interface State {
     textLabel: string,
     textValue: string,
-    size: number,
+    width: number,
+    height: number,
     background?: string,
     borderWidth?: number
 }
@@ -36,7 +21,8 @@ export interface State {
 export const initialState: State = {
     textLabel: "",
     textValue: "",
-    size: 200
+    width: 200,
+    height: 200
 }
 
 export class ReactCircleCard extends React.Component<{}, State>{
@@ -50,6 +36,8 @@ export class ReactCircleCard extends React.Component<{}, State>{
     }
 
     public state: State = initialState;
+    mount = null;
+    renderer = null;
 
     constructor(props: any){
         super(props);
@@ -64,19 +52,26 @@ export class ReactCircleCard extends React.Component<{}, State>{
         ReactCircleCard.updateCallback = null;
     }
 
-    render(){
-        const { textLabel, textValue, size, background, borderWidth } = this.state;
+    componentDidMount() {
+        this.renderer = new SpeckleRenderer( { domObject: this.mount }, ViewerSettings )
+        this.renderer.animate( )
+        let objs = exampleobjects.resources;
+        this.renderer.loadObjects( { objs: objs, zoomExtents: true } )
+    }
 
-        const style: React.CSSProperties = { width: size, height: size, background, borderWidth };
+    componentDidUpdate(prevProps, prevState) {
+        if(this.state.width !== prevState.width || this.state.height !== prevState.height) {
+            this.renderer.resizeCanvas()
+        }
+    }
+
+    render(){
+        const { textLabel, textValue, width, height, background, borderWidth } = this.state;
+
+        const style: React.CSSProperties = { width: width, height: height, background, borderWidth, backgroundColor: "pink" };
 
         return (
-            <div className="circleCard" style={style}>
-                <p>
-                    {textLabel}
-                    <br/>
-                    <em>{textValue} hrm</em>
-                </p>
-            </div>
+            <div className="circleCard" style={style} ref={ref => (this.mount = ref)} />
         )
     }
 }

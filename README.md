@@ -1,26 +1,28 @@
+# Speckle Power BI Visual
+Power BI Custom Visual that displays a 3D view of a Speckle Stream.
 
-# Circle Card React Custom Visual
+# Developer Setup
 
-> Demo Custom Visual using React JS
+    npm install
+    npm package
 
-# Overview
+This will create a self contained Power BI visual at `dist/#######.pbiviz`. From PowerBI go to `Home | More visuals | From my files` then select this `pbiviz` file. Anytime you make changes run `npm package` again and re load in Power BI.
 
-![React Circle Card](./assets/screenshot.png)
+This workflow will work on both Power BI Desktop and Online
 
-This repository represents a simple way to use React for development of Power BI Custom Visuals. Circle Card shows singular value inside a circle. It supports basic visual settings (color and circle thickness) and adaptability to viewport size.
+# Hot-reload with Power BI Online
+Power BI Online supports a slightly quicker workflow (this will not work with Power BI Desktop). Basically, you start a webserver from your repo, then Power BI Online grabs the latest visual from that webserver.
 
-React-based Custom Visual development basics are explained in [this tutorial](https://microsoft.github.io/PowerBI-visuals/tutorials/building-react-based-custom-visual/getting-started/). It describes step-by-step creation of Circle Card. You're welcome to use that example as a base to your own Custom Visuals by cloning this repository or using `pbiviz new react` command of [Power BI Visuals Tools](https://github.com/Microsoft/PowerBI-visuals-tools).
+## Setup a local Certificate
+Follow instructions here https://docs.microsoft.com/en-us/power-bi/developer/visuals/custom-visual-develop-tutorial#setting-up-the-developer-environment to install a root certificate on your local machine. This will allow you to run a server at https://localhost:8080
 
-# Contributing
+Then run
 
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.microsoft.com.
+    npm install
+    npm start
 
-When you submit a pull request, a CLA-bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., label, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
+## Enable Developer Visual
+Follow the instructions here https://docs.microsoft.com/en-us/power-bi/developer/visuals/custom-visual-develop-tutorial#setting-up-the-developer-environment to enable the Developer Visual.
 
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+Once you have added the Developer Visual to a report you can click the `Auto Reload` button above the visual. Now anytime you make changes to your code the visual will automatically reload.
+

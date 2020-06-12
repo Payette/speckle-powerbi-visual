@@ -2,20 +2,29 @@
   "name": "circle-card-react",
   "scripts": {
     "pbiviz": "pbiviz",
-    "start": "pbiviz start",
+    "start": "pbiviz start --port 8080",
     "package": "pbiviz package"
   },
   "dependencies": {
     "@babel/polyfill": "7.0.0",
     "@babel/runtime": "7.4.3",
     "@babel/runtime-corejs2": "7.4.3",
+    "@tweenjs/tween.js": "^18.5.0",
     "@types/react": "16.8.14",
     "@types/react-dom": "16.8.4",
+    "color-hash": "^1.0.3",
     "core-js": "^3.6.5",
+    "event-emitter-es6": "^1.1.5",
+    "flat": "^5.0.0",
+    "lodash.debounce": "^4.0.8",
     "powerbi-visuals-api": "2.5.0",
     "powerbi-visuals-utils-dataviewutils": "2.0.1",
+    "rainbowvis.js": "^1.0.1",
     "react": "16.8.6",
-    "react-dom": "16.8.6"
+    "react-dom": "16.8.6",
+    "three": "^0.117.1",
+    "three-dragcontrols": "^0.88.2",
+    "threejs-orbit-controls": "^1.0.3"
   },
   "devDependencies": {
     "powerbi-visuals-tools": "^3.1.14",
