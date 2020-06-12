@@ -13,12 +13,12 @@
         }
     ],
     "objects": {
-        "circle": {
-            "displayName": "Circle",
+        "speckle": {
+            "displayName": "3D",
             "properties": {
-                "circleColor": {
-                    "displayName": "Color 2",
-                    "description": "The fill color of the circle.",
+                "defaultRoomColor": {
+                    "displayName": "Default Room Color",
+                    "description": "The default fill color for rooms.",
                     "type": {
                         "fill": {
                             "solid": {
@@ -27,16 +27,9 @@
                         }
                     }
                 },
-                "circleThickness": {
-                    "displayName": "Thickness",
-                    "description": "The circle thickness.",
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "circleThickness2": {
-                    "displayName": "Thickness2",
-                    "description": "The circle thickness 2.",
+                "lineWeight": {
+                    "displayName": "Line Weight",
+                    "description": "The line weight of all lines.",
                     "type": {
                         "numeric": true
                     }

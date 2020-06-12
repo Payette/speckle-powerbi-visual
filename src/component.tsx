@@ -14,8 +14,8 @@ export interface State {
     speckleStreamURL: string,
     width: number,
     height: number,
-    background?: string,
-    borderWidth?: number,
+    defaultRoomColor?: string,
+    lineWeight?: number,
     camera?: string
 }
 
@@ -90,9 +90,9 @@ export class ReactCircleCard extends React.Component<{}, State>{
     }
 
     render(){
-        const { textLabel, speckleStreamURL, width, height, background, borderWidth } = this.state;
+        const { width, height } = this.state;
 
-        const style: React.CSSProperties = { width: width, height: height, background, borderWidth, backgroundColor: "pink" };
+        const style: React.CSSProperties = { width: width, height: height };
 
         return (
             <div className="circleCard" style={style} ref={ref => (this.mount = ref)} />

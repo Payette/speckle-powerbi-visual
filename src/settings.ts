@@ -10,13 +10,13 @@ import { dataViewObjectsParser } from "powerbi-visuals-utils-dataviewutils";
 import DataViewObjectsParser = dataViewObjectsParser.DataViewObjectsParser;
 
 export class CircleSettings {
-    public circleColor: string = "white";
-    public circleThickness: number = 2;
+    public defaultRoomColor: string = "white";
+    public lineWeight: number = 1;
     public camera: string = "perspective";
 }
 
 export class VisualSettings extends DataViewObjectsParser {
-    public circle: CircleSettings = new CircleSettings();
+    public speckle: CircleSettings = new CircleSettings();
 }
 
 export const ViewerSettings = {

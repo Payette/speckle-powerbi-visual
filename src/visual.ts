@@ -45,7 +45,7 @@ export class Visual implements IVisual {
             const { width, height } = this.viewport;
 
             this.settings = VisualSettings.parse(dataView) as VisualSettings;
-            const object = this.settings.circle;
+            const object = this.settings.speckle;
             
             var speckleStreamURL = undefined
             try {
@@ -60,8 +60,8 @@ export class Visual implements IVisual {
             ReactCircleCard.update({
                 width,
                 height,
-                borderWidth: object && object.circleThickness ? object.circleThickness : undefined,
-                background: object && object.circleColor ? object.circleColor : undefined,
+                lineWeight: object && object.lineWeight ? object.lineWeight : undefined,
+                defaultRoomColor: object && object.defaultRoomColor ? object.defaultRoomColor : undefined,
                 camera: object && object.camera ? object.camera : undefined,
                 textLabel: dataView.metadata.columns[0].displayName,
                 speckleStreamURL: speckleStreamURL
