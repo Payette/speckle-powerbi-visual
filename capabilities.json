@@ -33,13 +33,6 @@
     },
     "dataViewMappings": [
         {
-            "conditions": [
-                {
-                    "measure": {
-                        "max": 1
-                    }
-                }
-            ],
             "single": {
                 "role": "measure"
             }

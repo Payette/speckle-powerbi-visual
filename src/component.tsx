@@ -55,13 +55,35 @@ export class ReactCircleCard extends React.Component<{}, State>{
     componentDidMount() {
         this.renderer = new SpeckleRenderer( { domObject: this.mount }, ViewerSettings )
         this.renderer.animate( )
-        let objs = exampleobjects.resources;
-        this.renderer.loadObjects( { objs: objs, zoomExtents: true } )
+        this.grabSpeckleObjectsFromURLAndUpdate(this.state.textValue)
     }
 
     componentDidUpdate(prevProps, prevState) {
         if(this.state.width !== prevState.width || this.state.height !== prevState.height) {
             this.renderer.resizeCanvas()
+        }
+        if(this.state.textValue !== prevState.textValue) {
+            this.grabSpeckleObjectsFromURLAndUpdate(this.state.textValue)
+        }
+    }
+
+    grabSpeckleObjectsFromURLAndUpdate(url) {
+        const self = this
+
+        if(url) {
+            fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                console.log("got data from url");
+                console.log(data)
+
+                let objs = data.resources;
+                self.renderer.unloadAllObjects()
+                self.renderer.loadObjects( { objs: objs, zoomExtents: true } )               
+            })
+            .catch(error => {
+                console.error("Unable to fetch from URL", error)
+            })
         }
     }
 

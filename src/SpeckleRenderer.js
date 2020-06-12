@@ -494,6 +494,25 @@ export default class SpeckleRenderer extends EE {
     } )
   }
 
+  // removes all objects from the scene and recalculates the scene bounding sphere
+  unloadAllObjects() {
+    let toRemove = [ ]
+
+    this.scene.traverse( obj => {
+      if ( obj.userData._id ) {
+        toRemove.push( obj )
+      }
+    } )
+
+    toRemove.forEach( ( object, index ) => {
+      object.parent.remove( object )
+      if ( index === toRemove.length - 1 ) {
+        this.computeSceneBoundingSphere( )
+        this.zoomExtents( )
+      }
+    } )
+  }
+
   // sets (updates) the properties field of the objects
   // (useful if you modify the props outside three)
   updateObjectsProperties( { objects } ) {
