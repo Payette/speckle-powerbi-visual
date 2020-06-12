@@ -15,7 +15,8 @@ export interface State {
     width: number,
     height: number,
     background?: string,
-    borderWidth?: number
+    borderWidth?: number,
+    camera?: string
 }
 
 export const initialState: State = {
@@ -53,6 +54,7 @@ export class ReactCircleCard extends React.Component<{}, State>{
     }
 
     componentDidMount() {
+        ViewerSettings.camera = this.state.camera
         this.renderer = new SpeckleRenderer( { domObject: this.mount }, ViewerSettings )
         this.renderer.animate( )
         this.grabSpeckleObjectsFromURLAndUpdate(this.state.speckleStreamURL)
@@ -64,6 +66,9 @@ export class ReactCircleCard extends React.Component<{}, State>{
         }
         if(this.state.speckleStreamURL !== prevState.speckleStreamURL) {
             this.grabSpeckleObjectsFromURLAndUpdate(this.state.speckleStreamURL)
+        }
+        if(this.state.camera !== prevState.camera) {
+            this.renderer.updateCamera(this.state.camera)
         }
     }
 

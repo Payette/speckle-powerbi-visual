@@ -3,7 +3,8 @@
         {
             "displayName": "Speckle Stream URL",
             "name": "specklestreamurl",
-            "kind": "Measure"
+            "kind": "Measure",
+            "description": "URL of a Speckle object stream, should be like https://speckleserver/api/streams/STREAM_FINGERPRINT/objects"
         },
         {
             "displayName": "Rooms",
@@ -16,7 +17,7 @@
             "displayName": "Circle",
             "properties": {
                 "circleColor": {
-                    "displayName": "Color",
+                    "displayName": "Color 2",
                     "description": "The fill color of the circle.",
                     "type": {
                         "fill": {
@@ -31,6 +32,29 @@
                     "description": "The circle thickness.",
                     "type": {
                         "numeric": true
+                    }
+                },
+                "circleThickness2": {
+                    "displayName": "Thickness2",
+                    "description": "The circle thickness 2.",
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "camera": {
+                    "displayName": "Camera",
+                    "description": "The 3D camera perspective.",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "displayName": "Perspective",
+                                "value": "perspective"
+                            },
+                            {
+                                "displayName": "Orthographic",
+                                "value": "orthographic"
+                            }
+                        ]
                     }
                 }
             }

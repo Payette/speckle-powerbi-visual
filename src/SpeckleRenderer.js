@@ -95,30 +95,9 @@ export default class SpeckleRenderer extends EE {
     this.shadowLight.shadow.camera.near = 0.5; // default
     this.shadowLight.shadow.camera.far = 500;
 
-    // DEFAULT
-    // this.camera = new THREE.PerspectiveCamera( 75, this.domObject.offsetWidth / this.domObject.offsetHeight, 0.1, 100000 );
-    // this.camera.up.set( 0, 0, 1 )
-    // this.camera.position.z = 250
-    // this.camera.position.y = 250
-    // this.camera.position.x = 250
-
     // Fake Ortho
     this.camera = new THREE.PerspectiveCamera( 1, this.domObject.offsetWidth / this.domObject.offsetHeight, 0.1, 100000 );
-    this.resetCamera()
-
-    // NOT WORKING OrthographicCamera
-    // this.camera = new THREE.OrthographicCamera(
-    //   this.domObject.offsetWidth / -2,
-    //   this.domObject.offsetWidth / 2,
-    //   this.domObject.offsetHeight / 2,
-    //   this.domObject.offsetHeight / -2,
-    //   0.1, 100000
-    // );
-    // this.camera.up.set( 0, 0, 1 )
-    // this.camera.position.z = 250
-    // this.camera.position.y = 250
-    // this.camera.position.x = 250
-
+    this.resetCamera(false)
     this.camera.isCurrent = true
 
     let flashlight = new THREE.PointLight( new THREE.Color( '#FFFFFF' ), 0.32, 0, 1 )
@@ -182,11 +161,35 @@ export default class SpeckleRenderer extends EE {
     }.bind( this ), 200 ) )
   }
 
-  resetCamera() {
+  updateCamera(camera) {
+    this.viewerSettings.camera = camera
+    this.resetCamera()
+  }
+
+  resetCamera(zoomExtents = true) {
+    if(this.viewerSettings.camera === "orthographic") {
+      // Fake Ortho
+      this.camera.fov = 1
+      this.camera.aspect = this.domObject.offsetWidth / this.domObject.offsetHeight
+      this.camera.near = 0.1
+      this.camera.far = 100000      
+    } else {
+      // Perspective
+      this.camera.fov = 75
+      this.camera.aspect = this.domObject.offsetWidth / this.domObject.offsetHeight
+      this.camera.near = 0.1
+      this.camera.far = 100000      
+    }
+
     this.camera.up.set( 0, 0, 1 )
     this.camera.position.z = 250
     this.camera.position.y = 250
     this.camera.position.x = 250
+
+    if(zoomExtents) {
+      this.computeSceneBoundingSphere()
+      this.zoomExtents()
+    }
   }
 
   animate( ) {

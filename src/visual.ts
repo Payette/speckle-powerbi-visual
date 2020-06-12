@@ -62,6 +62,7 @@ export class Visual implements IVisual {
                 height,
                 borderWidth: object && object.circleThickness ? object.circleThickness : undefined,
                 background: object && object.circleColor ? object.circleColor : undefined,
+                camera: object && object.camera ? object.camera : undefined,
                 textLabel: dataView.metadata.columns[0].displayName,
                 speckleStreamURL: speckleStreamURL
             });

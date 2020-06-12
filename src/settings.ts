@@ -12,6 +12,7 @@ import DataViewObjectsParser = dataViewObjectsParser.DataViewObjectsParser;
 export class CircleSettings {
     public circleColor: string = "white";
     public circleThickness: number = 2;
+    public camera: string = "perspective";
 }
 
 export class VisualSettings extends DataViewObjectsParser {
@@ -19,6 +20,7 @@ export class VisualSettings extends DataViewObjectsParser {
 }
 
 export const ViewerSettings = {
+    camera: "perspective",
     showEdges: true,
     edgesThreshold: 1 /* default Threejs thresholdAngle */,
     castShadows: true,
