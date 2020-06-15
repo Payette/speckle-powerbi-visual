@@ -4,7 +4,7 @@ Power BI Custom Visual that displays a 3D view of a Speckle Stream.
 # Developer Setup
 
     npm install
-    npm package
+    npm run package
 
 This will create a self contained Power BI visual at `dist/#######.pbiviz`. From PowerBI go to `Home | More visuals | From my files` then select this `pbiviz` file. Anytime you make changes run `npm package` again and re load in Power BI.
 
