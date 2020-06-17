@@ -1,11 +1,11 @@
 {
     "visual":{
-        "name":"reactCircleCard",
-        "displayName":"ReactCircleCard",
-        "guid":"reactCircleCardF6C87CAA832A42FBBFBF7E66B8C15578",
+        "name":"SpeckleVisual",
+        "displayName":"SpeckleVisual",
+        "guid":"SpeckleVisualF6C87CAA832A42FBBFBF7E66B8C15578",
         "visualClassName":"Visual",
         "version":"1.0.0",
-        "description":"Circle Card",
+        "description":"Speckle Model Visual",
         "supportUrl":"https://www.google.com",
         "gitHubUrl":""
     },

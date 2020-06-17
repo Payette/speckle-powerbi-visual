@@ -472,11 +472,11 @@ export default class SpeckleRenderer extends EE {
           convertType = splitType.pop( )
         if ( Converter.hasOwnProperty( convertType ) ) {
           let myColor = undefined
-          console.log("ppp", obj)
-          console.log("x",this.getColor);
+          // console.log("ppp", obj)
+          // console.log("x",this.getColor);
           if(obj && obj.properties && this.getColor) {
             let objColor = this.getColor(obj.properties)
-            console.log("color",objColor);
+            // console.log("color",objColor);
             if(objColor) {
               // let objColor = obj.properties.parameters.Comments;
               console.log("Setting color to: ", objColor)
@@ -762,7 +762,7 @@ export default class SpeckleRenderer extends EE {
         colors[ k++ ] = myColour.g
         colors[ k++ ] = myColour.b
       }
-      obj.geometry.addAttribute( 'color', new THREE.BufferAttribute( colors, 3, true ) )
+      obj.geometry.setAttribute( 'color', new THREE.BufferAttribute( colors, 3, true ) )
       obj.geometry.attributes.color.needsUpdate = true
       obj.geometry.colorsNeedUpdate = true
       obj.material.vertexColors = THREE.VertexColors

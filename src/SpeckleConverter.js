@@ -343,7 +343,7 @@ let Converter = {
     if ( args.obj.closed )
       args.obj.value.push( args.obj.value[ 0 ], args.obj.value[ 1 ], args.obj.value[ 2 ] )
 
-    geometry.addAttribute( 'position', new THREE.Float32BufferAttribute( args.obj.value, 3 ) )
+    geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( args.obj.value, 3 ) )
     geometry.computeBoundingSphere( )
 
     let polyline = new THREE.Line( geometry, this.materialManager.getLineMaterial( args.obj.color ) )
@@ -396,7 +396,7 @@ let Converter = {
       }
     }
     geometry.setIndex( indices )
-    geometry.addAttribute( 'position', new THREE.Float32BufferAttribute( obj.vertices, 3 ) )
+    geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( obj.vertices, 3 ) )
     geometry.computeFaceNormals( )
     geometry.computeVertexNormals( )
 

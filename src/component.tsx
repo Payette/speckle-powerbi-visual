@@ -6,7 +6,6 @@
  */
 import * as React from "react";
 import SpeckleRenderer from './SpeckleRenderer.js'
-import exampleobjects from './speckleshapes.js'
 import { ViewerSettings } from "./settings";
 
 export interface State {
@@ -25,13 +24,13 @@ export const initialState: State = {
     height: 200
 }
 
-export class ReactCircleCard extends React.Component<{}, State>{
+export class SpeckleVisual extends React.Component<{}, State>{
 
     private static updateCallback: (data: object) => void = null;
 
     public static update(newState: State) {
-        if(typeof ReactCircleCard.updateCallback === 'function'){
-            ReactCircleCard.updateCallback(newState);
+        if (typeof SpeckleVisual.updateCallback === 'function') {
+            SpeckleVisual.updateCallback(newState);
         }
     }
 
@@ -39,63 +38,60 @@ export class ReactCircleCard extends React.Component<{}, State>{
     mount = null;
     renderer = null;
 
-    constructor(props: any){
+    constructor(props: any) {
         super(props);
         this.state = initialState;
     }
 
     public componentWillMount() {
-        ReactCircleCard.updateCallback = (newState: State): void => { this.setState(newState); };
+        SpeckleVisual.updateCallback = (newState: State): void => { this.setState(newState); };
     }
 
     public componentWillUnmount() {
-        ReactCircleCard.updateCallback = null;
+        SpeckleVisual.updateCallback = null;
     }
 
     componentDidMount() {
         ViewerSettings.camera = this.state.camera
         ViewerSettings.getColor = this.state.getColor;
-        this.renderer = new SpeckleRenderer( { domObject: this.mount }, ViewerSettings)
-        this.renderer.animate( )
+        this.renderer = new SpeckleRenderer({ domObject: this.mount }, ViewerSettings)
+        this.renderer.animate()
         this.grabSpeckleObjectsFromURLAndUpdate(this.state.speckleStreamURL)
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if(this.state.width !== prevState.width || this.state.height !== prevState.height) {
+        if (this.state.width !== prevState.width || this.state.height !== prevState.height) {
             this.renderer.resizeCanvas()
         }
-        if(this.state.speckleStreamURL !== prevState.speckleStreamURL) {
+        if (this.state.speckleStreamURL !== prevState.speckleStreamURL) {
             this.grabSpeckleObjectsFromURLAndUpdate(this.state.speckleStreamURL)
         }
-        if(this.state.camera !== prevState.camera) {
+        if (this.state.camera !== prevState.camera) {
             this.renderer.updateCamera(this.state.camera)
         }
-        // if(this.state.getColor !== prevState.getColor) {
         ViewerSettings.getColor = this.state.getColor;
-        console.log(ViewerSettings.getColor)
         this.renderer.updateViewerSettings(ViewerSettings)
         this.renderer.reloadObjects()
-        // }
     }
 
     grabSpeckleObjectsFromURLAndUpdate(url) {
         const self = this
 
-        if(url) {
+        if (url) {
             fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                let objs = data.resources;
-                self.renderer.unloadAllObjects()
-                self.renderer.loadObjects( { objs: objs, zoomExtents: true } )               
-            })
-            .catch(error => {
-                console.error("Unable to fetch from URL", error)
-            })
+                .then(response => response.json())
+                .then(data => {
+                    let objs = data.resources;
+                    self.renderer.unloadAllObjects()
+                    self.renderer.loadObjects({ objs: objs, zoomExtents: true })
+                })
+                .catch(error => {
+                    console.error("Unable to fetch from URL", error)
+                })
         }
     }
 
-    render(){
+    render() {
         const { width, height } = this.state;
 
         const style: React.CSSProperties = { width: width, height: height };
@@ -106,4 +102,4 @@ export class ReactCircleCard extends React.Component<{}, State>{
     }
 }
 
-export default ReactCircleCard;
+export default SpeckleVisual;

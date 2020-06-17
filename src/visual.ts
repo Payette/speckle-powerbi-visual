@@ -21,7 +21,7 @@ import VisualObjectInstance = powerbi.VisualObjectInstance;
 import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
 import VisualObjectInstanceEnumerationObject = powerbi.VisualObjectInstanceEnumerationObject;
 
-import { ReactCircleCard, initialState } from "./component";
+import { SpeckleVisual, initialState } from "./component";
 import { VisualSettings } from "./settings";
 import "./../style/visual.less";
 
@@ -32,7 +32,7 @@ export class Visual implements IVisual {
     private viewport: IViewport;
 
     constructor(options: VisualConstructorOptions) {
-        this.reactRoot = React.createElement(ReactCircleCard, {});
+        this.reactRoot = React.createElement(SpeckleVisual, {});
         this.target = options.element;
 
         ReactDOM.render(this.reactRoot, this.target);
@@ -51,18 +51,15 @@ export class Visual implements IVisual {
             let colorCategories = _.get(dataView, "categorical.categories[0].values")
             let colorValues = _.get(dataView, "categorical.values[0].values")
             let colorCategoryAttributeName = _.get(dataView, "metadata.columns[0].displayName")
-            // let getColor = (obj) => {
-            //     let category = _.get(obj, colorCategoryAttributeName)
-            //     if(category) {
-            //         let idx = colorCategories.indexOf(category)
-            //         if(idx >= 0) {
-            //             console.log(colorValues[idx]);
-            //             return colorValues[idx]
-            //         }
-            //     }
-            //     return defaultRoomColor;
-            // }
-            let getColor = obj => "ff0000";
+            let getColor = (obj) => {
+                let category = _.get(obj, colorCategoryAttributeName)
+                if(category) {
+                    let idx = colorCategories.indexOf(parseInt(category))
+                    if(idx >= 0) return colorValues[idx].trim();
+                }
+                return defaultRoomColor;
+            }
+            // let getColor = obj => "ff0000";
 
             // console.log(dataView)
             console.log(colorCategories, colorValues, colorCategoryAttributeName)
@@ -78,7 +75,7 @@ export class Visual implements IVisual {
             }
 
             if(speckleStreamURL) {
-                ReactCircleCard.update({
+                SpeckleVisual.update({
                     width,
                     height,
                     lineWeight: object && object.lineWeight ? object.lineWeight : undefined,
@@ -94,7 +91,7 @@ export class Visual implements IVisual {
     }
 
     private clear() {
-        ReactCircleCard.update(initialState);
+        SpeckleVisual.update(initialState);
     }
 
     public enumerateObjectInstances(
