@@ -24,7 +24,7 @@ export default class SpeckleRenderer extends EE {
     this.renderer = null
     this.scene = null
     this.camera = null
-    this.getColor = null
+    this.getColor = null;
     this.controls = null
     this.orbitControls = null
     this.dragControls = null;
@@ -118,7 +118,7 @@ export default class SpeckleRenderer extends EE {
     this.edgesGroup.visible = false
     this.scene.add( this.edgesGroup )
 
-    this.updateViewerSettings( )
+    this.updateViewerSettings(this.viewerSettings)
     // this.controls.enableDamping = true
     // this.controls.dampingFactor = 0.45
     // this.controls = new TrackballControls( this.camera, this.renderer.domElement  )
@@ -453,7 +453,8 @@ export default class SpeckleRenderer extends EE {
   reloadObjects() {
     if(this.objs) {
       this.unloadAllObjects()
-      this.loadObjects( { objs: this.objs, zoomExtents: true } )               
+      this.loadObjects( { objs: this.objs, zoomExtents: true } )      
+      console.log("reload called", this.getColor);         
     }
   }    
 
@@ -472,8 +473,10 @@ export default class SpeckleRenderer extends EE {
         if ( Converter.hasOwnProperty( convertType ) ) {
           let myColor = undefined
           console.log("ppp", obj)
-          if(obj && obj.properties && obj.properties.parameters && this.getColor) {
-            let objColor = this.getColor(obj.properties.parameters)
+          console.log("x",this.getColor);
+          if(obj && obj.properties && this.getColor) {
+            let objColor = this.getColor(obj.properties)
+            console.log("color",objColor);
             if(objColor) {
               // let objColor = obj.properties.parameters.Comments;
               console.log("Setting color to: ", objColor)
@@ -990,16 +993,17 @@ export default class SpeckleRenderer extends EE {
     doChunk( )
   }
 
-  updateViewerSettings( ) {
+  updateViewerSettings(viewerSettings ) {
+    this.viewerSettings = viewerSettings;
     this.setDefaultMeshMaterial( )
     // this.updateMaterialManager( )
-    this.shadowLight.visible = this.viewerSettings.castShadows
-    this.edgesGroup.visible = this.viewerSettings.showEdges
-    if ( this.edgesThreshold != this.viewerSettings.edgesThreshold ) {
+    this.shadowLight.visible = viewerSettings.castShadows
+    this.edgesGroup.visible = viewerSettings.showEdges
+    if ( this.edgesThreshold != viewerSettings.edgesThreshold ) {
       this.updateEdges( )
     }
-    this.edgesThreshold = this.viewerSettings.edgesThreshold
-    this.getColor = this.viewerSettings.getColor
+    this.edgesThreshold = viewerSettings.edgesThreshold
+    this.getColor = viewerSettings.getColor
   }
 
   setDefaultMeshMaterial( ) {

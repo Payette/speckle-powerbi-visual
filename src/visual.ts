@@ -51,18 +51,20 @@ export class Visual implements IVisual {
             let colorCategories = _.get(dataView, "categorical.categories[0].values")
             let colorValues = _.get(dataView, "categorical.values[0].values")
             let colorCategoryAttributeName = _.get(dataView, "metadata.columns[0].displayName")
-            let getColor = (obj) => {
-                let category = _.get(obj, colorCategoryAttributeName)
-                if(category) {
-                    let idx = colorCategories.indexOf(category)
-                    if(idx >= 0) {
-                        return colorValues[idx]
-                    }
-                }
-                return defaultRoomColor;
-            }
+            // let getColor = (obj) => {
+            //     let category = _.get(obj, colorCategoryAttributeName)
+            //     if(category) {
+            //         let idx = colorCategories.indexOf(category)
+            //         if(idx >= 0) {
+            //             console.log(colorValues[idx]);
+            //             return colorValues[idx]
+            //         }
+            //     }
+            //     return defaultRoomColor;
+            // }
+            let getColor = obj => "ff0000";
 
-            console.log(dataView)
+            // console.log(dataView)
             console.log(colorCategories, colorValues, colorCategoryAttributeName)
 
             var speckleStreamURL = undefined

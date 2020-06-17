@@ -54,7 +54,8 @@ export class ReactCircleCard extends React.Component<{}, State>{
 
     componentDidMount() {
         ViewerSettings.camera = this.state.camera
-        this.renderer = new SpeckleRenderer( { domObject: this.mount }, ViewerSettings )
+        ViewerSettings.getColor = this.state.getColor;
+        this.renderer = new SpeckleRenderer( { domObject: this.mount }, ViewerSettings)
         this.renderer.animate( )
         this.grabSpeckleObjectsFromURLAndUpdate(this.state.speckleStreamURL)
     }
@@ -69,10 +70,12 @@ export class ReactCircleCard extends React.Component<{}, State>{
         if(this.state.camera !== prevState.camera) {
             this.renderer.updateCamera(this.state.camera)
         }
-        if(this.state.getColor !== prevState.getColor) {
-            this.renderer.updateViewerSettings()
-            this.renderer.reloadObjects()
-        }
+        // if(this.state.getColor !== prevState.getColor) {
+        ViewerSettings.getColor = this.state.getColor;
+        console.log(ViewerSettings.getColor)
+        this.renderer.updateViewerSettings(ViewerSettings)
+        this.renderer.reloadObjects()
+        // }
     }
 
     grabSpeckleObjectsFromURLAndUpdate(url) {

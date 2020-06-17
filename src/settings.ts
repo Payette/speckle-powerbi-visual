@@ -35,5 +35,6 @@ export const ViewerSettings = {
     meshOverrides: {
         opacity: 100,
         specular: 100
-    }
+    },
+    getColor: undefined
 }
