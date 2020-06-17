@@ -30,7 +30,7 @@ export const ViewerSettings = {
         meshOverrides: {}
     },
     meshMaterialSpecular: {
-        meshOverrides: {} 
+        meshOverrides: {}
     },
     meshOverrides: {
         opacity: 100,

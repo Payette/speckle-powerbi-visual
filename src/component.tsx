@@ -75,15 +75,13 @@ export class SpeckleVisual extends React.Component<{}, State>{
     }
 
     grabSpeckleObjectsFromURLAndUpdate(url) {
-        const self = this
-
         if (url) {
             fetch(url)
                 .then(response => response.json())
                 .then(data => {
                     let objs = data.resources;
-                    self.renderer.unloadAllObjects()
-                    self.renderer.loadObjects({ objs: objs, zoomExtents: true })
+                    this.renderer.unloadAllObjects()
+                    this.renderer.loadObjects({ objs: objs, zoomExtents: true })
                 })
                 .catch(error => {
                     console.error("Unable to fetch from URL", error)
@@ -93,12 +91,8 @@ export class SpeckleVisual extends React.Component<{}, State>{
 
     render() {
         const { width, height } = this.state;
-
         const style: React.CSSProperties = { width: width, height: height };
-
-        return (
-            <div className="circleCard" style={style} ref={ref => (this.mount = ref)} />
-        )
+        return <div className="circleCard" style={style} ref={ref => (this.mount = ref)} />
     }
 }
 

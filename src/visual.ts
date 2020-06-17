@@ -39,7 +39,7 @@ export class Visual implements IVisual {
     }
 
     public update(options: VisualUpdateOptions) {
-        if(options.dataViews && options.dataViews.length > 0){
+        if (options.dataViews && options.dataViews.length > 0) {
             const dataView: DataView = options.dataViews[0];
             this.viewport = options.viewport;
             const { width, height } = this.viewport;
@@ -53,20 +53,18 @@ export class Visual implements IVisual {
             let colorCategoryAttributeName = _.get(dataView, "metadata.columns[0].displayName")
             let getColor = (obj) => {
                 let category = _.get(obj, colorCategoryAttributeName)
-                if(category) {
+                if (category) {
                     let idx = colorCategories.indexOf(parseInt(category))
-                    if(idx >= 0) return colorValues[idx].trim();
+                    if (idx >= 0) return colorValues[idx].trim();
                 }
                 return defaultRoomColor;
             }
-            // let getColor = obj => "ff0000";
 
-            // console.log(dataView)
             console.log(colorCategories, colorValues, colorCategoryAttributeName)
 
             var speckleStreamURL = undefined
             try {
-                if(object && object.specklestreamurl) {
+                if (object && object.specklestreamurl) {
                     const url = new URL(object.specklestreamurl)
                     speckleStreamURL = url.toString()
                 }
@@ -74,7 +72,7 @@ export class Visual implements IVisual {
                 console.error("Invalid URL for Speckle Stream", error)
             }
 
-            if(speckleStreamURL) {
+            if (speckleStreamURL) {
                 SpeckleVisual.update({
                     width,
                     height,
