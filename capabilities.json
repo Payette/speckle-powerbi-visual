@@ -6,7 +6,7 @@
             "kind": "Grouping"
         },
         {
-            "displayName": "Color Hex-value",
+            "displayName": "Color Hex-Value",
             "name": "roomcolorvalue",
             "kind": "Measure"
         }
