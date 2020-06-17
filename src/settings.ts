@@ -13,6 +13,8 @@ export class CircleSettings {
     public defaultRoomColor: string = "white";
     public lineWeight: number = 1;
     public camera: string = "perspective";
+    public specklestreamurl: string = "";
+    public getColor: (obj: any) => any = undefined;
 }
 
 export class VisualSettings extends DataViewObjectsParser {

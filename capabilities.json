@@ -1,14 +1,13 @@
 {
     "dataRoles": [
         {
-            "displayName": "Speckle Stream URL",
-            "name": "specklestreamurl",
-            "kind": "Measure",
-            "description": "URL of a Speckle object stream, should be like https://speckleserver/api/streams/STREAM_FINGERPRINT/objects"
+            "displayName": "Color by Attribute",
+            "name": "roomdata",
+            "kind": "Grouping"
         },
         {
-            "displayName": "Rooms",
-            "name": "rooms",
+            "displayName": "Color Hex-value",
+            "name": "roomcolorvalue",
             "kind": "Measure"
         }
     ],
@@ -16,6 +15,13 @@
         "speckle": {
             "displayName": "3D",
             "properties": {
+                "specklestreamurl": {
+                    "displayName": "Speckle Stream URL",
+                    "description": "URL of a Speckle object stream, should be like https://speckleserver/api/streams/STREAM_FINGERPRINT/objects",
+                    "type": {
+                        "text": true
+                    }
+                },
                 "defaultRoomColor": {
                     "displayName": "Default Room Color",
                     "description": "The default fill color for rooms.",
@@ -55,8 +61,21 @@
     },
     "dataViewMappings": [
         {
-            "single": {
-                "role": "specklestreamurl"
+            "categorical": {
+                "categories": {
+                    "for": {
+                        "in": "roomdata"
+                    }
+                },
+                "values": {
+                    "select": [
+                        {
+                            "bind": {
+                                "to": "roomcolorvalue"
+                            }
+                        }
+                    ]
+                }
             }
         }
     ]

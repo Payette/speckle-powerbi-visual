@@ -10,17 +10,16 @@ import exampleobjects from './speckleshapes.js'
 import { ViewerSettings } from "./settings";
 
 export interface State {
-    textLabel: string,
     speckleStreamURL: string,
     width: number,
     height: number,
     defaultRoomColor?: string,
     lineWeight?: number,
-    camera?: string
+    camera?: string,
+    getColor?: (obj: any) => any
 }
 
 export const initialState: State = {
-    textLabel: "",
     speckleStreamURL: "",
     width: 200,
     height: 200
@@ -69,6 +68,10 @@ export class ReactCircleCard extends React.Component<{}, State>{
         }
         if(this.state.camera !== prevState.camera) {
             this.renderer.updateCamera(this.state.camera)
+        }
+        if(this.state.getColor !== prevState.getColor) {
+            this.renderer.updateViewerSettings()
+            this.renderer.reloadObjects()
         }
     }
 

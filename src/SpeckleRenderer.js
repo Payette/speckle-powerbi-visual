@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-
+import _ from 'lodash'
 import OrbitControls from 'threejs-orbit-controls'
 import DragControls from 'three-dragcontrols';
 
@@ -20,9 +20,11 @@ export default class SpeckleRenderer extends EE {
   constructor( { domObject }, viewerSettings ) {
     super( ) // event emitter init
     this.domObject = domObject
+    this.objs = null
     this.renderer = null
     this.scene = null
     this.camera = null
+    this.getColor = null
     this.controls = null
     this.orbitControls = null
     this.dragControls = null;
@@ -448,18 +450,43 @@ export default class SpeckleRenderer extends EE {
     this.selectedObjects = [ ]
   }
 
+  reloadObjects() {
+    if(this.objs) {
+      this.unloadAllObjects()
+      this.loadObjects( { objs: this.objs, zoomExtents: true } )               
+    }
+  }    
+
   // adds a bunch of speckle objects to the scene. handles conversion and
   // computes each objects's bounding sphere for faster zoom extents calculation
   // of the scene bounding sphere.
   loadObjects( { objs, zoomExtents } ) {
+    this.objs = objs
+
     objs.forEach( ( obj, index ) => {
       try {
         let splitType = obj.type.split( "/" )
         let convertType = splitType.pop( )
         while ( splitType.length > 0 & !Converter.hasOwnProperty( convertType ) )
           convertType = splitType.pop( )
-        if ( Converter.hasOwnProperty( convertType ) )
+        if ( Converter.hasOwnProperty( convertType ) ) {
+          let myColor = undefined
+          console.log("ppp", obj)
+          if(obj && obj.properties && obj.properties.parameters && this.getColor) {
+            let objColor = this.getColor(obj.properties.parameters)
+            if(objColor) {
+              // let objColor = obj.properties.parameters.Comments;
+              console.log("Setting color to: ", objColor)
+              myColor = new THREE.Color()
+              myColor.setHex("0x" + objColor);
+            }
+          }
+          // console.log(objColor)
           Converter[ convertType ]( { obj: obj }, ( err, threeObj ) => {
+            if(myColor) {
+              threeObj.material = new THREE.MeshStandardMaterial({ color: myColor })
+            }
+
             threeObj.userData._id = obj._id
             threeObj.userData.properties = obj.properties ? flatten( obj.properties, { safe: true } ) : null
             threeObj.userData.originalColor = threeObj.material.color.clone( )
@@ -470,6 +497,7 @@ export default class SpeckleRenderer extends EE {
             this.scene.add( threeObj )
             this.threeObjs.push(threeObj);
           } )
+        }
       } catch ( e ) {
         console.warn( `Something went wrong in the conversion of ${obj._id} (${obj.type})` )
         console.log( obj )
@@ -971,6 +999,7 @@ export default class SpeckleRenderer extends EE {
       this.updateEdges( )
     }
     this.edgesThreshold = this.viewerSettings.edgesThreshold
+    this.getColor = this.viewerSettings.getColor
   }
 
   setDefaultMeshMaterial( ) {

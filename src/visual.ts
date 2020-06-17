@@ -9,6 +9,7 @@ import "@babel/polyfill";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import powerbi from "powerbi-visuals-api";
+import _ from 'lodash';
 
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
@@ -38,34 +39,53 @@ export class Visual implements IVisual {
     }
 
     public update(options: VisualUpdateOptions) {
-
-        if(options.dataViews && options.dataViews[0]){
+        if(options.dataViews && options.dataViews.length > 0){
             const dataView: DataView = options.dataViews[0];
             this.viewport = options.viewport;
             const { width, height } = this.viewport;
 
             this.settings = VisualSettings.parse(dataView) as VisualSettings;
             const object = this.settings.speckle;
-            
+
+            let defaultRoomColor = _.get(object, "defaultRoomColor") || "ff0000"
+            let colorCategories = _.get(dataView, "categorical.categories[0].values")
+            let colorValues = _.get(dataView, "categorical.values[0].values")
+            let colorCategoryAttributeName = _.get(dataView, "metadata.columns[0].displayName")
+            let getColor = (obj) => {
+                let category = _.get(obj, colorCategoryAttributeName)
+                if(category) {
+                    let idx = colorCategories.indexOf(category)
+                    if(idx >= 0) {
+                        return colorValues[idx]
+                    }
+                }
+                return defaultRoomColor;
+            }
+
+            console.log(dataView)
+            console.log(colorCategories, colorValues, colorCategoryAttributeName)
+
             var speckleStreamURL = undefined
             try {
-                if(dataView && dataView.single && dataView.single.value) {
-                    const url = new URL(dataView.single.value.toString())
+                if(object && object.specklestreamurl) {
+                    const url = new URL(object.specklestreamurl)
                     speckleStreamURL = url.toString()
                 }
             } catch (error) {
                 console.error("Invalid URL for Speckle Stream", error)
             }
 
-            ReactCircleCard.update({
-                width,
-                height,
-                lineWeight: object && object.lineWeight ? object.lineWeight : undefined,
-                defaultRoomColor: object && object.defaultRoomColor ? object.defaultRoomColor : undefined,
-                camera: object && object.camera ? object.camera : undefined,
-                textLabel: dataView.metadata.columns[0].displayName,
-                speckleStreamURL: speckleStreamURL
-            });
+            if(speckleStreamURL) {
+                ReactCircleCard.update({
+                    width,
+                    height,
+                    lineWeight: object && object.lineWeight ? object.lineWeight : undefined,
+                    defaultRoomColor: object && object.defaultRoomColor ? object.defaultRoomColor : undefined,
+                    camera: object && object.camera ? object.camera : undefined,
+                    speckleStreamURL: speckleStreamURL,
+                    getColor: getColor
+                });
+            }
         } else {
             this.clear();
         }
