@@ -22,6 +22,7 @@ import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 import VisualObjectInstance = powerbi.VisualObjectInstance;
 import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
 import VisualObjectInstanceEnumerationObject = powerbi.VisualObjectInstanceEnumerationObject;
+import IVisualEventService = powerbi.extensibility.IVisualEventService;
 
 import { SpeckleVisual, initialState } from "./component";
 import { VisualSettings } from "./settings";
@@ -34,16 +35,19 @@ export class Visual implements IVisual {
     private viewport: IViewport;
     private host: IVisualHost;
     private selectionManager: ISelectionManager;
+    private events: IVisualEventService;
 
     constructor(options: VisualConstructorOptions) {
         this.reactRoot = React.createElement(SpeckleVisual, {});
         this.target = options.element;
         this.host = options.host;
         this.selectionManager = this.host.createSelectionManager();
+        this.events = options.host.eventService;
         ReactDOM.render(this.reactRoot, this.target);
     }
 
     public update(options: VisualUpdateOptions) {
+        this.events.renderingStarted(options);
         if (options.dataViews && options.dataViews.length > 0) {
             const dataView: DataView = options.dataViews[0];
             this.viewport = options.viewport;
@@ -78,6 +82,7 @@ export class Visual implements IVisual {
                     speckleStreamURL = url.toString()
                 }
             } catch (error) {
+                this.events.renderingFailed(options);
                 console.error("Invalid URL for Speckle Stream", error)
             }
 
@@ -97,6 +102,7 @@ export class Visual implements IVisual {
         } else {
             this.clear();
         }
+        this.events.renderingFinished(options);
     }
 
     private clear() {
