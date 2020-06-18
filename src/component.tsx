@@ -7,6 +7,8 @@
 import * as React from "react";
 import SpeckleRenderer from './SpeckleRenderer.js'
 import { ViewerSettings } from "./settings";
+import powerbi from 'powerbi-visuals-api';
+import ISelectionManager = powerbi.extensibility.ISelectionManager;
 
 export interface State {
     speckleStreamURL: string,
@@ -15,7 +17,9 @@ export interface State {
     defaultRoomColor?: string,
     lineWeight?: number,
     camera?: string,
-    getColor?: (obj: any) => any
+    getColor?: (obj: any) => any,
+    getSelectionID?: (index: any) => any,
+    selectionManager?: ISelectionManager
 }
 
 export const initialState: State = {
@@ -54,6 +58,8 @@ export class SpeckleVisual extends React.Component<{}, State>{
     componentDidMount() {
         ViewerSettings.camera = this.state.camera
         ViewerSettings.getColor = this.state.getColor;
+        ViewerSettings.getSelectionID = this.state.getSelectionID;
+        ViewerSettings.selectionManager = this.state.selectionManager;
         this.renderer = new SpeckleRenderer({ domObject: this.mount }, ViewerSettings)
         this.renderer.animate()
         this.grabSpeckleObjectsFromURLAndUpdate(this.state.speckleStreamURL)
@@ -70,6 +76,9 @@ export class SpeckleVisual extends React.Component<{}, State>{
             this.renderer.updateCamera(this.state.camera)
         }
         ViewerSettings.getColor = this.state.getColor;
+        ViewerSettings.getSelectionID = this.state.getSelectionID;
+        ViewerSettings.selectionManager = this.state.selectionManager;
+        ViewerSettings.defaultRoomColor = this.state.defaultRoomColor;
         this.renderer.updateViewerSettings(ViewerSettings)
         this.renderer.reloadObjects()
     }

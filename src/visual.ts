@@ -16,6 +16,8 @@ import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import IVisual = powerbi.extensibility.visual.IVisual;
 import DataView = powerbi.DataView;
 import IViewport = powerbi.IViewport;
+import ISelectionManager = powerbi.extensibility.ISelectionManager;
+import IVisualHost = powerbi.extensibility.visual.IVisualHost;
 
 import VisualObjectInstance = powerbi.VisualObjectInstance;
 import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
@@ -30,11 +32,14 @@ export class Visual implements IVisual {
     private reactRoot: React.ComponentElement<any, any>;
     private settings: VisualSettings;
     private viewport: IViewport;
+    private host: IVisualHost;
+    private selectionManager: ISelectionManager;
 
     constructor(options: VisualConstructorOptions) {
         this.reactRoot = React.createElement(SpeckleVisual, {});
         this.target = options.element;
-
+        this.host = options.host;
+        this.selectionManager = this.host.createSelectionManager();
         ReactDOM.render(this.reactRoot, this.target);
     }
 
@@ -47,7 +52,7 @@ export class Visual implements IVisual {
             this.settings = VisualSettings.parse(dataView) as VisualSettings;
             const object = this.settings.speckle;
 
-            let defaultRoomColor = _.get(object, "defaultRoomColor") || "ff0000"
+            let defaultRoomColor = _.get(object, "defaultRoomColor");
             let colorCategories = _.get(dataView, "categorical.categories[0].values")
             let colorValues = _.get(dataView, "categorical.values[0].values")
             let colorCategoryAttributeName = _.get(dataView, "metadata.columns[0].displayName")
@@ -58,6 +63,10 @@ export class Visual implements IVisual {
                     if (idx >= 0) return colorValues[idx].trim();
                 }
                 return defaultRoomColor;
+            }
+            
+            let getSelectionID = index =>{
+                return this.host.createSelectionIdBuilder().withCategory(dataView.categorical.categories[0], index).createSelectionId();
             }
 
             console.log(colorCategories, colorValues, colorCategoryAttributeName)
@@ -80,7 +89,9 @@ export class Visual implements IVisual {
                     defaultRoomColor: object && object.defaultRoomColor ? object.defaultRoomColor : undefined,
                     camera: object && object.camera ? object.camera : undefined,
                     speckleStreamURL: speckleStreamURL,
-                    getColor: getColor
+                    getColor: getColor,
+                    getSelectionID: getSelectionID,
+                    selectionManager: this.selectionManager
                 });
             }
         } else {
