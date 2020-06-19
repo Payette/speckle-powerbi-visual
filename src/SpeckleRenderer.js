@@ -14,6 +14,7 @@ import debounce from 'lodash.debounce'
 import { Converter } from './SpeckleConverter.js'
 import SelectionBox from './SelectionBox.js'
 import SelectionHelper from './SelectionHelper.js'
+import {SVGRenderer} from './SVGRenderer.js'
 
 export default class SpeckleRenderer extends EE {
 
@@ -26,7 +27,11 @@ export default class SpeckleRenderer extends EE {
     this.camera = null
     this.getColor = null;
     this.getSelectionID = null;
+    this.getUniqueProps = null;
+    this.colorPalette = null;
     this.selectionManager = null;
+    this.isHighlighted = null;
+    this.hasHighlights = null;
     this.controls = null
     this.orbitControls = null
     this.dragControls = null;
@@ -68,11 +73,13 @@ export default class SpeckleRenderer extends EE {
   }
 
   initialise() {
-    this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, logarithmicDepthBuffer: true })
+    this.renderer = new SVGRenderer()
     this.renderer.setSize(this.domObject.offsetWidth, this.domObject.offsetHeight)
+    this.renderer.setQuality('low')
+    // this.renderer.setQuality( 'low' );
     // this.renderer.setClearColor( new THREE.Color(  ), 0.0 )
     // this.resizeCanvas()
-    this.renderer.shadowMap.enabled = true
+    // this.renderer.shadowMap.enabled = true
     this.domObject.appendChild(this.renderer.domElement)
 
     this.scene = new THREE.Scene()
@@ -112,7 +119,7 @@ export default class SpeckleRenderer extends EE {
     this.controls.enabled = true
     this.controls.screenSpacePanning = true
     // this.controls.enablePan = true
-    // this.controls.enableRotate = false
+    this.controls.enableRotate = false
 
     // this.controls.minPolarAngle = 0;
     // this.controls.maxPolarAngle = Math.PI / 2;
@@ -238,7 +245,7 @@ export default class SpeckleRenderer extends EE {
 
   keydown(event) {
     if (!this.enableKeyboardEvents) return
-    console.log(event);
+    // console.log(event);
     switch (event.keyCode) {
       case 32:
         this.computeSceneBoundingSphere()
@@ -323,21 +330,21 @@ export default class SpeckleRenderer extends EE {
           this.addToSelection([this.hoveredObject])
           let selectedID = _.get(this.hoveredObject, 'userData.selectionID');
           //https://discourse.threejs.org/t/changing-opacity-of-a-object-group/8783/2
-          function setOpacity( obj, opacity ) {
+          function setOpacity(obj, opacity ) {
             obj.children.forEach((child)=>{
-              setOpacity( child, opacity );
+              setOpacity(child, opacity)
             });
-            if ( obj.material ) {
-              // obj.material.__preSelectColor = this.hoveredObject.material.color.clone( )
-              // obj.material.__preHoverColor = this.selectColor
-              // obj.material = new THREE.MeshStandardMaterial({ color: "000000" })
-              // obj.material.color.copy( this.selectColor )    
+            if(obj.material) {
+              
+              obj.material.transparent = true;  
               obj.material.opacity = opacity;
+              
             };
           };
 
           if(selectedID) this.selectionManager.select(selectedID).then(ids =>{
-            setOpacity(this.scene, ids.length > 0 ? 0.7 : 1);
+            setOpacity(this.scene, ids.length > 0 ? 0.1 : 1);
+            this.hoveredObject.material.transparent = false;
             this.hoveredObject.material.opacity = 1;
 
             // this.highlightMouseOverObject();
@@ -459,6 +466,7 @@ export default class SpeckleRenderer extends EE {
         this.selectedObjects.splice(myIndex, 1)
         obj.material.color.copy(obj.material.__preSelectColor)
         obj.material.__preHoverColor.copy(obj.material.__preSelectColor)
+
       }
       if (index === objects.length - 1) {
         // TODO: emit removed from selection event
@@ -489,7 +497,9 @@ export default class SpeckleRenderer extends EE {
   loadObjects({ objs, zoomExtents }) {
     this.objs = objs
     var selected = this.selectionManager.getSelectionIds();
-
+    // var uniqueProps = [... new Set(objs.map(o=>o.userData.))]
+    var uniqueProps = this.getUniqueProps(objs);
+    // console.log(uniqueProps);
     objs.forEach((obj, index) => {
       try {
         let splitType = obj.type.split("/")
@@ -499,34 +509,40 @@ export default class SpeckleRenderer extends EE {
         if (Converter.hasOwnProperty(convertType)) {
           let myColor = undefined
           let objColor = undefined;
-          if (obj && obj.properties && this.getColor) {
-            
-            objColor = this.getColor(obj.properties)
+          if (obj && obj.properties && this.colorPalette) {
+            console.log(this.isHighlighted(obj))
+            objColor = this.getColor(uniqueProps, obj)
             if (objColor) {
-              console.log("Setting color to: ", objColor)
+              // console.log("Setting color to: ", objColor)
+              // console.log(obj)
               myColor = new THREE.Color()
               myColor.setHex("0x" + objColor);
             }
           }
           Converter[convertType]({ obj: obj }, (err, threeObj) => {
             if (myColor) {
-              threeObj.material = new THREE.MeshStandardMaterial({ color: myColor })
+              threeObj.material = new THREE.MeshBasicMaterial({ color: myColor, side: THREE.DoubleSide })
             }
-            console.log(this.viewerSettings.defaultRoomColor)
-            console.log(objColor === this.viewerSettings.defaultRoomColor)
-            if (objColor && objColor === this.viewerSettings.defaultRoomColor){
-              console.log("default object, making transparent")
-              threeObj.material.opacity = 0.7;
+            // console.log(this.viewerSettings.defaultRoomColor)
+            // console.log(objColor === this.viewerSettings.defaultRoomColor)
+            if (!this.isHighlighted(obj) && this.hasHighlights()){
+              // console.log("default object, making transparent")
+              threeObj.material.transparent = true;
+              threeObj.material.opacity = 0.1; 
+            }
+            else if(this.isHighlighted(obj)){
+              threeObj.material.transparent = false;
+
             }
 
 
             threeObj.userData._id = obj._id
             threeObj.userData.selectionID = this.getSelectionID(index);
+            // console.log(threeObj);
             let isSelected = false;
             // selected.forEach(id=>{
             //   if(_.isEqual(threeObj.userData.selectionID, id)) isSelected = true;
             // })
-
             // if(selected.length > 0 && !isSelected){
             //   threeObj.material = new THREE.MeshStandardMaterial({ color: "ff0000", opacity: 0.7 })
             // }
@@ -535,7 +551,7 @@ export default class SpeckleRenderer extends EE {
             threeObj.geometry.computeBoundingSphere()
             threeObj.castShadow = true
             threeObj.receiveShadow = true
-            // this.drawEdges(threeObj, obj._id)
+            this.drawEdges(threeObj, obj._id)
             this.scene.add(threeObj)
             this.threeObjs.push(threeObj);
           })
@@ -1043,6 +1059,10 @@ export default class SpeckleRenderer extends EE {
     }
     this.edgesThreshold = viewerSettings.edgesThreshold;
     this.getColor = viewerSettings.getColor;
+    this.isHighlighted = viewerSettings.isHighlighted;
+    this.hasHighlights = viewerSettings.hasHighlights;
+    this.getUniqueProps = viewerSettings.getUniqueProps;
+    this.colorPalette = viewerSettings.colorPalette;
     this.getSelectionID = viewerSettings.getSelectionID;
     this.selectionManager = viewerSettings.selectionManager;
     

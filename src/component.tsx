@@ -9,7 +9,7 @@ import SpeckleRenderer from './SpeckleRenderer.js'
 import { ViewerSettings } from "./settings";
 import powerbi from 'powerbi-visuals-api';
 import ISelectionManager = powerbi.extensibility.ISelectionManager;
-
+import IColorPalette = powerbi.extensibility.IColorPalette;
 export interface State {
     speckleStreamURL: string,
     width: number,
@@ -17,9 +17,14 @@ export interface State {
     defaultRoomColor?: string,
     lineWeight?: number,
     camera?: string,
-    getColor?: (obj: any) => any,
+    getColor?: (uniqueFICMs:any, obj: any) => any,
     getSelectionID?: (index: any) => any,
-    selectionManager?: ISelectionManager
+    getUniqueProps?: (objs:any) => any,
+    selectionManager?: ISelectionManager,
+    isHighlighted?: (obj: any, property: string) => Boolean
+    highlighted?: any,
+    colorPalette?: IColorPalette,
+    hasHighlights?: any
 }
 
 export const initialState: State = {
@@ -58,8 +63,12 @@ export class SpeckleVisual extends React.Component<{}, State>{
     componentDidMount() {
         ViewerSettings.camera = this.state.camera
         ViewerSettings.getColor = this.state.getColor;
+        ViewerSettings.getUniqueProps = this.state.getUniqueProps;
         ViewerSettings.getSelectionID = this.state.getSelectionID;
         ViewerSettings.selectionManager = this.state.selectionManager;
+        ViewerSettings.isHighlighted = this.state.isHighlighted;
+        ViewerSettings.colorPalette = this.state.colorPalette;
+        ViewerSettings.hasHighlights = this.state.hasHighlights;
         this.renderer = new SpeckleRenderer({ domObject: this.mount }, ViewerSettings)
         this.renderer.animate()
         this.grabSpeckleObjectsFromURLAndUpdate(this.state.speckleStreamURL)
@@ -76,9 +85,13 @@ export class SpeckleVisual extends React.Component<{}, State>{
             this.renderer.updateCamera(this.state.camera)
         }
         ViewerSettings.getColor = this.state.getColor;
+        ViewerSettings.getUniqueProps = this.state.getUniqueProps;
         ViewerSettings.getSelectionID = this.state.getSelectionID;
         ViewerSettings.selectionManager = this.state.selectionManager;
         ViewerSettings.defaultRoomColor = this.state.defaultRoomColor;
+        ViewerSettings.isHighlighted = this.state.isHighlighted;
+        ViewerSettings.colorPalette = this.state.colorPalette;
+        ViewerSettings.hasHighlights = this.state.hasHighlights;
         this.renderer.updateViewerSettings(ViewerSettings)
         this.renderer.reloadObjects()
     }
@@ -101,7 +114,7 @@ export class SpeckleVisual extends React.Component<{}, State>{
     render() {
         const { width, height } = this.state;
         const style: React.CSSProperties = { width: width, height: height };
-        return <div className="circleCard" style={style} ref={ref => (this.mount = ref)} />
+        return <div className="circleCard" style={style} ref={ref => (this.mount = ref)}/>
     }
 }
 

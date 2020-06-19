@@ -23,6 +23,11 @@ import VisualObjectInstance = powerbi.VisualObjectInstance;
 import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
 import VisualObjectInstanceEnumerationObject = powerbi.VisualObjectInstanceEnumerationObject;
 import IVisualEventService = powerbi.extensibility.IVisualEventService;
+import DataViewCategorical = powerbi.DataViewCategorical;
+import DataViewCategoryColumn = powerbi.DataViewCategoryColumn;
+import PrimitiveValue = powerbi.PrimitiveValue;
+import DataViewValueColumn = powerbi.DataViewValueColumn;
+import IColorPalette = powerbi.extensibility.IColorPalette;
 
 import { SpeckleVisual, initialState } from "./component";
 import { VisualSettings } from "./settings";
@@ -36,6 +41,7 @@ export class Visual implements IVisual {
     private host: IVisualHost;
     private selectionManager: ISelectionManager;
     private events: IVisualEventService;
+    private colorPalette: IColorPalette;
 
     constructor(options: VisualConstructorOptions) {
         this.reactRoot = React.createElement(SpeckleVisual, {});
@@ -43,6 +49,7 @@ export class Visual implements IVisual {
         this.host = options.host;
         this.selectionManager = this.host.createSelectionManager();
         this.events = options.host.eventService;
+        this.colorPalette = this.host.colorPalette;
         ReactDOM.render(this.reactRoot, this.target);
     }
 
@@ -60,17 +67,50 @@ export class Visual implements IVisual {
             let colorCategories = _.get(dataView, "categorical.categories[0].values")
             let colorValues = _.get(dataView, "categorical.values[0].values")
             let colorCategoryAttributeName = _.get(dataView, "metadata.columns[0].displayName")
-            let getColor = (obj) => {
-                let category = _.get(obj, colorCategoryAttributeName)
+            let filterCategoryAttributeName = _.get(dataView, "metadata.columns[1].displayName")
+            // console.log(dataView.categorical.categories[0])
+            const measures: DataViewValueColumn = dataView.categorical.values[0];
+            const measureValues = measures.values;
+            const measureHighlights = measures.highlights;
+            
+            const valuesToHighlight = colorCategories.filter((category: PrimitiveValue, index: number) => {
+                const measureValue = measureValues[index];
+                const measureHighlight = measureHighlights && measureHighlights[index] ? measureHighlights[index] : null;
+                return measureValue === measureHighlight
+            
+            });
+            console.log(valuesToHighlight)
+            let isHighlighted = (obj) => {
+                let objectProp = _.get(obj.properties, filterCategoryAttributeName);
+                let idx = valuesToHighlight.indexOf(objectProp);
+                return idx >= 0;
+            }
+
+            let hasHighlights = () => {
+                return valuesToHighlight.length > 0;
+            }
+            // let uniqueFICMs = [...new Set(dataView.categorical.values[0].values)]
+            // console.log(uniqueFICMs);
+            let getColor = (uniqueProps, obj) => {
+                let category = _.get(obj.properties, colorCategoryAttributeName)
+                // console.log(category)
                 if (category) {
-                    let idx = colorCategories.indexOf(parseInt(category))
-                    if (idx >= 0) return colorValues[idx].trim();
+                    let idx = uniqueProps.indexOf(category + "")
+                    // console.log(dataView.categorical.values[0].values, idx);
+
+                    if (idx >= 0) return this.colorPalette.getColor(uniqueProps[idx] + "").value.replace("#","");
                 }
                 return defaultRoomColor;
             }
             
-            let getSelectionID = index =>{
-                return this.host.createSelectionIdBuilder().withCategory(dataView.categorical.categories[0], index).createSelectionId();
+            let getUniqueProps = objs =>{
+                let bigList = objs.map(obj=> _.get(obj.properties, colorCategoryAttributeName));
+                return [...new Set(bigList)]
+            }
+
+            let getSelectionID = i =>{
+                // console.log(dataView.categorical.values[0]);
+                return this.host.createSelectionIdBuilder().withCategory(dataView.categorical.categories[0],i).createSelectionId();
             }
 
             console.log(colorCategories, colorValues, colorCategoryAttributeName)
@@ -96,7 +136,11 @@ export class Visual implements IVisual {
                     speckleStreamURL: speckleStreamURL,
                     getColor: getColor,
                     getSelectionID: getSelectionID,
-                    selectionManager: this.selectionManager
+                    selectionManager: this.selectionManager,
+                    colorPalette: this.colorPalette,
+                    getUniqueProps: getUniqueProps,
+                    isHighlighted: isHighlighted,
+                    hasHighlights: hasHighlights
                 });
             }
         } else {

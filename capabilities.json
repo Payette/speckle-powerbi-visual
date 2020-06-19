@@ -1,13 +1,13 @@
 {
     "dataRoles": [
         {
-            "displayName": "Color by Attribute",
-            "name": "roomdata",
+            "displayName": "Filter by Attribute",
+            "name": "roomname",
             "kind": "Grouping"
         },
         {
-            "displayName": "Color Hex-value",
-            "name": "roomcolorvalue",
+            "displayName": "Color by Attribute",
+            "name": "roomattr",
             "kind": "Measure"
         }
     ],
@@ -64,19 +64,20 @@
             "categorical": {
                 "categories": {
                     "for": {
-                        "in": "roomdata"
+                        "in": "roomname"
                     }
                 },
                 "values": {
                     "select": [
                         {
                             "bind": {
-                                "to": "roomcolorvalue"
+                                "to": "roomattr"
                             }
                         }
                     ]
                 }
             }
         }
-    ]
+    ],
+    "supportsHighlight": true
 }

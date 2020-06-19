@@ -15,7 +15,7 @@ class MaterialManager {
     this.lineHighlightMat = null
     this.pointHighlightMat = null
 
-    this.defaultMeshMat = new THREE.MeshPhongMaterial({
+    this.defaultMeshMat = new THREE.MeshStandardMaterial({
       color: new THREE.Color('#A9A9A9'),
       specular: new THREE.Color('#C8FFE7'),
       shininess: 30,
@@ -32,7 +32,7 @@ class MaterialManager {
   // TODO: ghost materials
   getMeshGhostMat() {
     if (this.meshGhostMat) return this.meshGhostMat
-    this.meshGhostMat = new THREE.MeshPhongMaterial({
+    this.meshGhostMat = new THREE.MeshBasicMaterial({
       color: new THREE.Color('#E6E6E6'),
       specular: new THREE.Color('#FFECB3'),
       shininess: 30,

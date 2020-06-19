@@ -10,6 +10,7 @@ import { dataViewObjectsParser } from "powerbi-visuals-utils-dataviewutils";
 import DataViewObjectsParser = dataViewObjectsParser.DataViewObjectsParser;
 import powerbi from 'powerbi-visuals-api';
 import ISelectionManager = powerbi.extensibility.ISelectionManager;
+import IColorPalette = powerbi.extensibility.IColorPalette;
 
 export class CircleSettings {
     public defaultRoomColor: string = "000000";
@@ -17,9 +18,12 @@ export class CircleSettings {
     public lineWeight: number = 1;
     public camera: string = "perspective";
     public specklestreamurl: string = "";
-    public getColor: (obj: any) => any = undefined;
+    public getColor: (uniqueFICMs:any, obj: any) => any = undefined;
+    public getUniqueProps?: (objs:any) => any;
     public getSelectionID: (obj: any) => any = undefined;
     public selectionManager: ISelectionManager = undefined;
+    public colorPalette: IColorPalette = undefined;
+    public hasHighlights?: any;
 }
 
 export class VisualSettings extends DataViewObjectsParser {
@@ -46,6 +50,10 @@ export const ViewerSettings = {
     getColor: undefined,
     getSelectionID: undefined,
     selectionManager: undefined,
+    getUniqueProps: undefined,
     defaultRoomColor: "000000",
-    defaultOpacity: 0.6
+    defaultOpacity: 0.6,
+    isHighlighted: undefined,
+    colorPalette: undefined,
+    hasHighlights: undefined
 }
