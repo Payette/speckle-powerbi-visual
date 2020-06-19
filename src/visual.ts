@@ -108,7 +108,7 @@ export class Visual implements IVisual {
                 let id = _.get(obj.properties, filterCategoryAttributeName)
                 if (id) {
                     let prop = roomColorMap[id];
-                    console.log(id, prop);
+                    // console.log(id, prop);
                     if (prop) return this.colorPalette.getColor(prop + "").value.replace("#","");
                 }
                 return this.colorPalette.getColor("default").value.replace("#","");
@@ -123,9 +123,9 @@ export class Visual implements IVisual {
                 // console.log(dataView.categorical.values[0]);
                 let propValue = _.get(obj.properties,filterCategoryAttributeName)
                 // console.log(dataView.categorical.categories[0].values)
-                let trueIndex = colorCategories.values.indexOf(propValue); 
-                // console.log(propValue, trueIndex);
-                return this.host.createSelectionIdBuilder().withCategory(colorCategories,trueIndex).createSelectionId();
+                let trueIndex = colorCategories.indexOf(propValue); 
+                console.log(propValue, trueIndex);
+                return this.host.createSelectionIdBuilder().withCategory(dataView.categorical.categories[0],trueIndex).createSelectionId();
             }
 
             // console.log(colorCategories, colorValues, colorCategoryAttributeName)

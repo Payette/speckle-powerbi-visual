@@ -400,7 +400,7 @@ export default class SpeckleRenderer extends EE {
     this.objs = objs
     var uniqueProps = this.getUniqueProps(objs);
     //For some reason I think we need to sort by room first 
-    let sorted = this.sortObjs(objs);
+    let sorted = this.sortObjs(objs); 
     console.log(sorted);
     sorted.forEach((obj, index) => {
       try {
