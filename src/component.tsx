@@ -24,7 +24,8 @@ export interface State {
     isHighlighted?: (obj: any, property: string) => Boolean
     highlighted?: any,
     colorPalette?: IColorPalette,
-    hasHighlights?: any
+    hasHighlights?: any,
+    sortObjs?: any
 }
 
 export const initialState: State = {
@@ -69,6 +70,7 @@ export class SpeckleVisual extends React.Component<{}, State>{
         ViewerSettings.isHighlighted = this.state.isHighlighted;
         ViewerSettings.colorPalette = this.state.colorPalette;
         ViewerSettings.hasHighlights = this.state.hasHighlights;
+        ViewerSettings.sortObjs = this.state.sortObjs;
         this.renderer = new SpeckleRenderer({ domObject: this.mount }, ViewerSettings)
         this.renderer.animate()
         this.grabSpeckleObjectsFromURLAndUpdate(this.state.speckleStreamURL)
@@ -89,6 +91,7 @@ export class SpeckleVisual extends React.Component<{}, State>{
         ViewerSettings.getSelectionID = this.state.getSelectionID;
         ViewerSettings.selectionManager = this.state.selectionManager;
         ViewerSettings.defaultRoomColor = this.state.defaultRoomColor;
+        ViewerSettings.sortObjs = this.state.sortObjs;
         ViewerSettings.isHighlighted = this.state.isHighlighted;
         ViewerSettings.colorPalette = this.state.colorPalette;
         ViewerSettings.hasHighlights = this.state.hasHighlights;

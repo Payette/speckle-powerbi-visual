@@ -8,7 +8,7 @@
         {
             "displayName": "Color by Attribute",
             "name": "roomattr",
-            "kind": "Measure"
+            "kind": "Grouping"
         }
     ],
     "objects": {
@@ -63,16 +63,26 @@
         {
             "categorical": {
                 "categories": {
-                    "for": {
-                        "in": "roomname"
-                    }
-                },
-                "values": {
                     "select": [
                         {
-                            "bind": {
-                                "to": "roomattr"
-                            }
+                            "for": {
+                                "in": "roomname"
+                            },
+                            "dataReductionAlgorithm": {
+                                "top": {
+                                    "count": 30000
+                                }
+                            }  
+                        },
+                        {
+                            "for": {
+                                "in": "roomattr"
+                            },
+                            "dataReductionAlgorithm": {
+                                "top": {
+                                    "count": 30000
+                                }
+                            }  
                         }
                     ]
                 }

@@ -29,6 +29,7 @@ export default class SpeckleRenderer extends EE {
     this.colorPalette = null;
     this.selectionManager = null;
     this.isHighlighted = null;
+    this.sortObjs = null;
     this.hasHighlights = null;
     this.controls = null
     this.orbitControls = null
@@ -170,7 +171,7 @@ export default class SpeckleRenderer extends EE {
       this.camera.far = 100000
     }
 
-    this.camera.up.set(0, 0, 1)
+    this.camera.up.set(0, 0, -1)
     this.camera.position.z = 250
     this.camera.position.y = 250
     this.camera.position.x = 250
@@ -231,8 +232,9 @@ export default class SpeckleRenderer extends EE {
     // check if it's a single short click (as opposed to a longer difference caused by moving the orbit controls
     // or dragging the selection box)
     if (Date.now() - this.mouseDownTime < 300) {
-      console.log(this.hoveredObject);
-
+      // console.log(this.hoveredObject);
+      this.getColor(this.hoveredObject)
+      // console.log(this.hoveredObject)
       if(this.hoveredObject.userData.selected) {
         console.log("Should be removing")
         if(this.selectedObjects.length === 1) this.clearSelection();
@@ -364,9 +366,6 @@ export default class SpeckleRenderer extends EE {
         obj.userData.selected = false
         removed.push(obj.userData._id)
         this.selectedObjects.splice(myIndex, 1)
-        // obj.material.color.copy(obj.material.__preSelectColor)
-        // obj.material.__preHoverColor.copy(obj.material.__preSelectColor)
-
       }
       if (index === objects.length - 1) {
         // TODO: emit removed from selection event
@@ -400,36 +399,34 @@ export default class SpeckleRenderer extends EE {
   loadObjects({ objs, zoomExtents }) {
     this.objs = objs
     var uniqueProps = this.getUniqueProps(objs);
-    objs.forEach((obj, index) => {
+    //For some reason I think we need to sort by room first 
+    let sorted = this.sortObjs(objs);
+    console.log(sorted);
+    sorted.forEach((obj, index) => {
       try {
         let splitType = obj.type.split("/")
         let convertType = splitType.pop()
-        while (splitType.length > 0 & !Converter.hasOwnProperty(convertType))
-          convertType = splitType.pop()
+        while (splitType.length > 0 & !Converter.hasOwnProperty(convertType)) convertType = splitType.pop()
         if (Converter.hasOwnProperty(convertType)) {
           let myColor = undefined
           let objColor = undefined;
           if (obj && obj.properties && this.colorPalette) {
-            console.log(this.isHighlighted(obj))
-            objColor = this.getColor(uniqueProps, obj)
+            // console.log(this.isHighlighted(obj))
+            objColor = this.getColor(obj)
             if (objColor) {
               myColor = new THREE.Color()
               myColor.setHex("0x" + objColor);
             }
           }
           Converter[convertType]({ obj: obj }, (err, threeObj) => {
-            if (myColor) {
-              threeObj.material = new THREE.MeshBasicMaterial({ color: myColor, side: THREE.DoubleSide })
-            }
+            if (myColor) threeObj.material = new THREE.MeshBasicMaterial({ color: myColor, side: THREE.DoubleSide })
             if (!this.isHighlighted(obj) && this.hasHighlights()){
               threeObj.material.transparent = true;
               threeObj.material.opacity = 0.1; 
             }
-            else if(this.isHighlighted(obj)){
-              threeObj.material.transparent = false;
-            }
+            else if(this.isHighlighted(obj)) threeObj.material.transparent = false;
             threeObj.userData._id = obj._id
-            threeObj.userData.selectionID = this.getSelectionID(index);
+            threeObj.userData.selectionID = this.getSelectionID(obj);
             threeObj.userData.properties = obj.properties ? flatten(obj.properties, { safe: true }) : null
             threeObj.userData.originalColor = threeObj.material.color.clone()
             threeObj.geometry.computeBoundingSphere()
@@ -634,6 +631,7 @@ export default class SpeckleRenderer extends EE {
     this.getUniqueProps = viewerSettings.getUniqueProps;
     this.colorPalette = viewerSettings.colorPalette;
     this.getSelectionID = viewerSettings.getSelectionID;
+    this.sortObjs = viewerSettings.sortObjs;
     this.selectionManager = viewerSettings.selectionManager;
     
   }

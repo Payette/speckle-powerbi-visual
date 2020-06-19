@@ -24,6 +24,7 @@ export class CircleSettings {
     public selectionManager: ISelectionManager = undefined;
     public colorPalette: IColorPalette = undefined;
     public hasHighlights?: any;
+    public sortObjs?: any;
 }
 
 export class VisualSettings extends DataViewObjectsParser {
@@ -55,5 +56,6 @@ export const ViewerSettings = {
     defaultOpacity: 0.6,
     isHighlighted: undefined,
     colorPalette: undefined,
-    hasHighlights: undefined
+    hasHighlights: undefined,
+    sortObjs: undefined
 }
