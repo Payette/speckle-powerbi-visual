@@ -72,9 +72,9 @@ export default class SpeckleRenderer extends EE {
   }
 
   initialise() {
-    this.renderer = new SVGRenderer()
+    this.renderer = new THREE.WebGLRenderer( { alpha: true, antialias: true, logarithmicDepthBuffer: true } )
     this.renderer.setSize(this.domObject.offsetWidth, this.domObject.offsetHeight)
-    this.renderer.setQuality('low')
+    // this.renderer.setQuality('low')
     this.domObject.appendChild(this.renderer.domElement)
 
     this.scene = new THREE.Scene()
@@ -233,7 +233,7 @@ export default class SpeckleRenderer extends EE {
     // or dragging the selection box)
     if (Date.now() - this.mouseDownTime < 300) {
       // console.log(this.hoveredObject);
-      this.getColor(this.hoveredObject)
+      // this.getColor(this.hoveredObject)
       // console.log(this.hoveredObject)
       if(this.hoveredObject.userData.selected) {
         console.log("Should be removing")
@@ -381,7 +381,7 @@ export default class SpeckleRenderer extends EE {
       obj.material.opacity = 1;
       if(obj.material.__preHoverColor) obj.material.color.copy(obj.material.__preHoverColor)
     })
-    this.selectionManager.clear();
+    // this.selectionManager.clear();
     this.emit('select-objects', [])
     this.selectedObjects = []
   }
@@ -401,7 +401,7 @@ export default class SpeckleRenderer extends EE {
     var uniqueProps = this.getUniqueProps(objs);
     //For some reason I think we need to sort by room first 
     let sorted = this.sortObjs(objs); 
-    console.log(sorted);
+    // console.log(sorted);
     sorted.forEach((obj, index) => {
       try {
         let splitType = obj.type.split("/")
@@ -413,6 +413,7 @@ export default class SpeckleRenderer extends EE {
           if (obj && obj.properties && this.colorPalette) {
             // console.log(this.isHighlighted(obj))
             objColor = this.getColor(obj)
+            console.log(objColor);
             if (objColor) {
               myColor = new THREE.Color()
               myColor.setHex("0x" + objColor);

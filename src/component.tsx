@@ -17,7 +17,7 @@ export interface State {
     defaultRoomColor?: string,
     lineWeight?: number,
     camera?: string,
-    getColor?: (uniqueFICMs:any, obj: any) => any,
+    getColor?: (obj: any) => any,
     getSelectionID?: (index: any) => any,
     getUniqueProps?: (objs:any) => any,
     selectionManager?: ISelectionManager,

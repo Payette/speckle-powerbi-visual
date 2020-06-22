@@ -31,6 +31,7 @@ export class VisualSettings extends DataViewObjectsParser {
     public speckle: CircleSettings = new CircleSettings();
     public meshOverrides: any;
     public edgesThreshold: number;
+    public defaultRoomColor: string;
 }
 
 export const ViewerSettings = {
