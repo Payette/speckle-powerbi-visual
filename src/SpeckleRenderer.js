@@ -652,9 +652,7 @@ export default class SpeckleRenderer extends EE {
     this.setDefaultMeshMaterial()
     this.shadowLight.visible = viewerSettings.castShadows
     this.edgesGroup.visible = viewerSettings.showEdges
-    if (this.edgesThreshold != viewerSettings.edgesThreshold) {
-      this.updateEdges()
-    }
+    if (this.edgesThreshold != viewerSettings.edgesThreshold) this.updateEdges()
     this.edgesThreshold = viewerSettings.edgesThreshold;
     this.getColor = viewerSettings.getColor;
     this.isHighlighted = viewerSettings.isHighlighted;
@@ -664,74 +662,48 @@ export default class SpeckleRenderer extends EE {
     this.getSelectionID = viewerSettings.getSelectionID;
     this.sortObjs = viewerSettings.sortObjs;
     this.selectionManager = viewerSettings.selectionManager;
-    if(this.exportpdf && viewerSettings.exportpdf !== this.exportpdf){
-      // this.loadRenderer(this.exportpdf);
-      console.log("Swapping renderers to ", viewerSettings.exportpdf)
-      // this.renderer.context.getExtension('WEBGL_lose_context').loseContext();
-      if(viewerSettings.exportpdf === "SVG"){
-        if(this.domObject) this.domObject.removeChild(this.domObject.childNodes[0]);
-        console.log("Setting SVG")
-        this.exportpdf = "SVG"
-        this.renderer.domElement.removeEventListener('mousemove', this.onTouchMove.bind(this))
-        this.renderer.domElement.removeEventListener('touchmove', this.onTouchMove.bind(this))
-    
-        this.renderer.domElement.removeEventListener('mousedown', this.mouseDown.bind(this))
-        this.renderer.domElement.removeEventListener('mouseup', this.mouseUp.bind(this))
-    
-        this.domObject.removeEventListener('mouseover', this.enableEvents.bind(this))
-        this.domObject.removeEventListener('mouseout', this.disableEvents.bind(this))
-
-        this.domObject.appendChild(this.svgrenderer.domElement);
-        this.svgrenderer.setQuality('low');
-        this.svgrenderer.setSize(this.domObject.offsetWidth, this.domObject.offsetHeight)
-        this.renderer = this.svgrenderer;
-        this.controls = new OrbitControls(this.camera, this.renderer.domElement)
-        this.controls.enabled = true
-        this.controls.screenSpacePanning = true
-        this.controls.enableRotate = false
-        this.renderer.domElement.addEventListener('mousemove', this.onTouchMove.bind(this))
-        this.renderer.domElement.addEventListener('touchmove', this.onTouchMove.bind(this))
-    
-        this.renderer.domElement.addEventListener('mousedown', this.mouseDown.bind(this))
-        this.renderer.domElement.addEventListener('mouseup', this.mouseUp.bind(this))
-    
-        this.domObject.addEventListener('mouseover', this.enableEvents.bind(this))
-        this.domObject.addEventListener('mouseout', this.disableEvents.bind(this))
-      }
-      else{
-        if(this.domObject) this.domObject.removeChild(this.domObject.childNodes[0]);
-        console.log("Setting webGL")
-
-        this.renderer.domElement.removeEventListener('mousemove', this.onTouchMove.bind(this))
-        this.renderer.domElement.removeEventListener('touchmove', this.onTouchMove.bind(this))
-    
-        this.renderer.domElement.removeEventListener('mousedown', this.mouseDown.bind(this))
-        this.renderer.domElement.removeEventListener('mouseup', this.mouseUp.bind(this))
-    
-        this.domObject.removeEventListener('mouseover', this.enableEvents.bind(this))
-        this.domObject.removeEventListener('mouseout', this.disableEvents.bind(this))
-
-        this.domObject.appendChild(this.webglrenderer.domElement);
-        this.renderer = this.webglrenderer;
-        this.controls = new OrbitControls(this.camera, this.renderer.domElement)
-        this.controls = new OrbitControls(this.camera, this.renderer.domElement)
-        this.controls.enabled = true
-        this.controls.screenSpacePanning = true
-        this.controls.enableRotate = false
-        this.renderer.domElement.addEventListener('mousemove', this.onTouchMove.bind(this))
-        this.renderer.domElement.addEventListener('touchmove', this.onTouchMove.bind(this))
-    
-        this.renderer.domElement.addEventListener('mousedown', this.mouseDown.bind(this))
-        this.renderer.domElement.addEventListener('mouseup', this.mouseUp.bind(this))
-    
-        this.domObject.addEventListener('mouseover', this.enableEvents.bind(this))
-        this.domObject.addEventListener('mouseout', this.disableEvents.bind(this))
-      }
-    }
+    if(this.exportpdf && viewerSettings.exportpdf !== this.exportpdf) this.switchRenderer(viewerSettings.exportpdf)
     this.exportpdf = viewerSettings.exportpdf;
-    // this.initialise();
-    // this.renderer = this.exportpdf === "SVG"? new SVGRenderer() : new THREE.WebGLRenderer( { alpha: true, antialias: true, logarithmicDepthBuffer: true } )
+  }
+  
+  switchRenderer(renderer){
+    if(this.domObject) this.domObject.removeChild(this.domObject.childNodes[0]);
+    console.log("Setting ", renderer)
+    this.renderer.domElement.removeEventListener('mousemove', this.onTouchMove.bind(this))
+    this.renderer.domElement.removeEventListener('touchmove', this.onTouchMove.bind(this))
 
+    this.renderer.domElement.removeEventListener('mousedown', this.mouseDown.bind(this))
+    this.renderer.domElement.removeEventListener('mouseup', this.mouseUp.bind(this))
+
+    this.domObject.removeEventListener('mouseover', this.enableEvents.bind(this))
+    this.domObject.removeEventListener('mouseout', this.disableEvents.bind(this))
+
+    if(renderer === "SVG"){
+      this.domObject.appendChild(this.svgrenderer.domElement);
+      this.svgrenderer.setQuality('high');
+      this.svgrenderer.setSize(this.domObject.offsetWidth, this.domObject.offsetHeight)
+      this.renderer = this.svgrenderer;
+    }
+    else {
+      this.domObject.appendChild(this.webglrenderer.domElement);
+      // this.webglrenderer.setQuality('low');
+      this.webglrenderer.setSize(this.domObject.offsetWidth, this.domObject.offsetHeight)
+      this.renderer = this.webglrenderer;
+    }    
+
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement)
+    this.controls.enabled = true
+    this.controls.screenSpacePanning = true
+    this.controls.enableRotate = false
+
+    this.renderer.domElement.addEventListener('mousemove', this.onTouchMove.bind(this))
+    this.renderer.domElement.addEventListener('touchmove', this.onTouchMove.bind(this))
+
+    this.renderer.domElement.addEventListener('mousedown', this.mouseDown.bind(this))
+    this.renderer.domElement.addEventListener('mouseup', this.mouseUp.bind(this))
+
+    this.domObject.addEventListener('mouseover', this.enableEvents.bind(this))
+    this.domObject.addEventListener('mouseout', this.disableEvents.bind(this))
   }
 
   setDefaultMeshMaterial() {
