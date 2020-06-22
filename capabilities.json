@@ -15,6 +15,22 @@
         "speckle": {
             "displayName": "3D",
             "properties": {
+                "exportpdf": {
+                    "displayName": "Renderer",
+                    "description": "If you want to export the visual to PDF, select SVG. Otherwise keep it with WebGL",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "displayName": "WebGL",
+                                "value": "WebGL"
+                            },
+                            {
+                                "displayName": "SVG",
+                                "value": "SVG"
+                            }
+                        ]
+                    }
+                },
                 "specklestreamurl": {
                     "displayName": "Speckle Stream URL",
                     "description": "URL of a Speckle object stream, should be like https://speckleserver/api/streams/STREAM_FINGERPRINT/objects",

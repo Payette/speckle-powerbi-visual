@@ -23,7 +23,10 @@ export default class SpeckleRenderer extends EE {
     this.renderer = null
     this.scene = null
     this.camera = null
+    this.exportpdf = viewerSettings.exportpdf;
     this.getColor = null;
+    this.webglrenderer = null;
+    this.svgrenderer = null;
     this.getSelectionID = null;
     this.getUniqueProps = null;
     this.colorPalette = null;
@@ -67,15 +70,26 @@ export default class SpeckleRenderer extends EE {
     this.edgesThreshold = null
 
     this.viewerSettings = viewerSettings
+    this.exportpdf = this.viewerSettings.exportpdf
+    // if(this.renderer) this.renderer.dispose();
+    // console.log(this.viewerSettings.exportpdf)
+    this.webglrenderer = new THREE.WebGLRenderer( { alpha: true, antialias: true, logarithmicDepthBuffer: true } )
+    // this.renderer = new SVGRenderer();
+    this.webglrenderer.setSize(this.domObject.offsetWidth, this.domObject.offsetHeight)
+
+    // this.renderer.setQuality('low')
+    this.svgrenderer = new SVGRenderer();
+    console.log(this.exportpdf)
+          // if(this.domObject) this.domObject.removeChild(this.svgrenderer.domElement);
+    console.log("Setting webGL")
+
+    this.domObject.appendChild(this.webglrenderer.domElement);
+    this.renderer = this.webglrenderer;
 
     this.initialise()
   }
 
   initialise() {
-    this.renderer = new THREE.WebGLRenderer( { alpha: true, antialias: true, logarithmicDepthBuffer: true } )
-    this.renderer.setSize(this.domObject.offsetWidth, this.domObject.offsetHeight)
-    // this.renderer.setQuality('low')
-    this.domObject.appendChild(this.renderer.domElement)
 
     this.scene = new THREE.Scene()
 
@@ -154,6 +168,21 @@ export default class SpeckleRenderer extends EE {
   updateCamera(camera) {
     this.viewerSettings.camera = camera
     this.resetCamera()
+  }
+
+  loadRenderer(renderer){
+    if(this.renderer) this.renderer.dispose();
+    this.renderer = renderer === "SVG"? new SVGRenderer() : new THREE.WebGLRenderer( { alpha: true, antialias: true, logarithmicDepthBuffer: true } )
+    this.scene = new THREE.Scene()
+    this.domObject.appendChild(this.renderer.domElement)
+
+    this.renderer.domElement.addEventListener('mousemove', this.onTouchMove.bind(this))
+    this.renderer.domElement.addEventListener('touchmove', this.onTouchMove.bind(this))
+
+    this.renderer.domElement.addEventListener('mousedown', this.mouseDown.bind(this))
+    this.renderer.domElement.addEventListener('mouseup', this.mouseUp.bind(this))
+
+    this.render();
   }
 
   resetCamera(zoomExtents = true) {
@@ -324,9 +353,7 @@ export default class SpeckleRenderer extends EE {
           // if there was a pre-exsiting hovered object
           // unhover it first
           if (this.hoveredObject) {
-            this.hoveredObject.userData.selected ?
-              this.hoveredObject.material.color.copy(this.selectColor) :
-              this.hoveredObject.material.color.copy(this.hoveredObject.material.__preHoverColor)
+            this.hoveredObject.material.color.copy(this.hoveredObject.material.__preHoverColor)
 
             this.hoveredObject.userData.hovered = false
           }
@@ -379,6 +406,7 @@ export default class SpeckleRenderer extends EE {
       obj.userData.selected = false
       obj.material.transparent = false;
       obj.material.opacity = 1;
+      this.drawEdges(obj, obj._id)
       if(obj.material.__preHoverColor) obj.material.color.copy(obj.material.__preHoverColor)
     })
     // this.selectionManager.clear();
@@ -401,6 +429,8 @@ export default class SpeckleRenderer extends EE {
     var uniqueProps = this.getUniqueProps(objs);
     //For some reason I think we need to sort by room first 
     let sorted = this.sortObjs(objs); 
+    // this.renderer = this.exportpdf === "SVG"? new SVGRenderer() : new THREE.WebGLRenderer( { alpha: true, antialias: true, logarithmicDepthBuffer: true } )
+    // this.render();
     // console.log(sorted);
     sorted.forEach((obj, index) => {
       try {
@@ -413,7 +443,7 @@ export default class SpeckleRenderer extends EE {
           if (obj && obj.properties && this.colorPalette) {
             // console.log(this.isHighlighted(obj))
             objColor = this.getColor(obj)
-            console.log(objColor);
+            // console.log(objColor);
             if (objColor) {
               myColor = new THREE.Color()
               myColor.setHex("0x" + objColor);
@@ -634,7 +664,74 @@ export default class SpeckleRenderer extends EE {
     this.getSelectionID = viewerSettings.getSelectionID;
     this.sortObjs = viewerSettings.sortObjs;
     this.selectionManager = viewerSettings.selectionManager;
+    if(this.exportpdf && viewerSettings.exportpdf !== this.exportpdf){
+      // this.loadRenderer(this.exportpdf);
+      console.log("Swapping renderers to ", viewerSettings.exportpdf)
+      // this.renderer.context.getExtension('WEBGL_lose_context').loseContext();
+      if(viewerSettings.exportpdf === "SVG"){
+        if(this.domObject) this.domObject.removeChild(this.domObject.childNodes[0]);
+        console.log("Setting SVG")
+        this.exportpdf = "SVG"
+        this.renderer.domElement.removeEventListener('mousemove', this.onTouchMove.bind(this))
+        this.renderer.domElement.removeEventListener('touchmove', this.onTouchMove.bind(this))
     
+        this.renderer.domElement.removeEventListener('mousedown', this.mouseDown.bind(this))
+        this.renderer.domElement.removeEventListener('mouseup', this.mouseUp.bind(this))
+    
+        this.domObject.removeEventListener('mouseover', this.enableEvents.bind(this))
+        this.domObject.removeEventListener('mouseout', this.disableEvents.bind(this))
+
+        this.domObject.appendChild(this.svgrenderer.domElement);
+        this.svgrenderer.setQuality('low');
+        this.svgrenderer.setSize(this.domObject.offsetWidth, this.domObject.offsetHeight)
+        this.renderer = this.svgrenderer;
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement)
+        this.controls.enabled = true
+        this.controls.screenSpacePanning = true
+        this.controls.enableRotate = false
+        this.renderer.domElement.addEventListener('mousemove', this.onTouchMove.bind(this))
+        this.renderer.domElement.addEventListener('touchmove', this.onTouchMove.bind(this))
+    
+        this.renderer.domElement.addEventListener('mousedown', this.mouseDown.bind(this))
+        this.renderer.domElement.addEventListener('mouseup', this.mouseUp.bind(this))
+    
+        this.domObject.addEventListener('mouseover', this.enableEvents.bind(this))
+        this.domObject.addEventListener('mouseout', this.disableEvents.bind(this))
+      }
+      else{
+        if(this.domObject) this.domObject.removeChild(this.domObject.childNodes[0]);
+        console.log("Setting webGL")
+
+        this.renderer.domElement.removeEventListener('mousemove', this.onTouchMove.bind(this))
+        this.renderer.domElement.removeEventListener('touchmove', this.onTouchMove.bind(this))
+    
+        this.renderer.domElement.removeEventListener('mousedown', this.mouseDown.bind(this))
+        this.renderer.domElement.removeEventListener('mouseup', this.mouseUp.bind(this))
+    
+        this.domObject.removeEventListener('mouseover', this.enableEvents.bind(this))
+        this.domObject.removeEventListener('mouseout', this.disableEvents.bind(this))
+
+        this.domObject.appendChild(this.webglrenderer.domElement);
+        this.renderer = this.webglrenderer;
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement)
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement)
+        this.controls.enabled = true
+        this.controls.screenSpacePanning = true
+        this.controls.enableRotate = false
+        this.renderer.domElement.addEventListener('mousemove', this.onTouchMove.bind(this))
+        this.renderer.domElement.addEventListener('touchmove', this.onTouchMove.bind(this))
+    
+        this.renderer.domElement.addEventListener('mousedown', this.mouseDown.bind(this))
+        this.renderer.domElement.addEventListener('mouseup', this.mouseUp.bind(this))
+    
+        this.domObject.addEventListener('mouseover', this.enableEvents.bind(this))
+        this.domObject.addEventListener('mouseout', this.disableEvents.bind(this))
+      }
+    }
+    this.exportpdf = viewerSettings.exportpdf;
+    // this.initialise();
+    // this.renderer = this.exportpdf === "SVG"? new SVGRenderer() : new THREE.WebGLRenderer( { alpha: true, antialias: true, logarithmicDepthBuffer: true } )
+
   }
 
   setDefaultMeshMaterial() {

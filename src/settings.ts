@@ -25,6 +25,7 @@ export class CircleSettings {
     public colorPalette: IColorPalette = undefined;
     public hasHighlights?: any;
     public sortObjs?: any;
+    public exportpdf: string = "WebGL";
 }
 
 export class VisualSettings extends DataViewObjectsParser {
@@ -32,6 +33,7 @@ export class VisualSettings extends DataViewObjectsParser {
     public meshOverrides: any;
     public edgesThreshold: number;
     public defaultRoomColor: string;
+    // public exportpdf: string;
 }
 
 export const ViewerSettings = {
@@ -58,5 +60,6 @@ export const ViewerSettings = {
     isHighlighted: undefined,
     colorPalette: undefined,
     hasHighlights: undefined,
-    sortObjs: undefined
+    sortObjs: undefined,
+    exportpdf: "WebGL"
 }

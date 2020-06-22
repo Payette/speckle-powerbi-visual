@@ -64,15 +64,21 @@ export class Visual implements IVisual {
             const object = this.settings.speckle;
 
             let defaultRoomColor = _.get(object, "defaultRoomColor");
-            let filterCategories = _.get(dataView, "categorical.categories[0].values")
+            let exportpdf = _.get(object, 'exportpdf');
+            // console.log(exportpdf);
+
+            let measureIndex = dataView.metadata.columns.findIndex(c=>c.isMeasure);
+            let categoryIndex = dataView.metadata.columns.findIndex(c=>!c.isMeasure);
+            // console.log("measure",measureIndex," category", categoryIndex)
+            let filterCategories = _.get(dataView, `categorical.categories[0].values`)
             let colorCategories = _.get(dataView, "categorical.values[0].values")
-            let filterCategoryAttributeName = _.get(dataView, "metadata.columns[1].displayName")
-            let colorCategoryAttributeName = _.get(dataView, "metadata.columns[0].displayName")
+            let filterCategoryAttributeName = _.get(dataView, "metadata.columns["+categoryIndex+"].displayName")
+            let colorCategoryAttributeName = _.get(dataView, "metadata.columns["+measureIndex+"].displayName")
             // console.log(dataView.categorical.categories[0])
             const measures: DataViewValueColumn = dataView.categorical.values[0];
             const measureValues = measures.values;
             const measureHighlights = measures.highlights;
-            // console.log(dataView);
+            console.log(dataView);
             // console.log(this.selectionManager.getSelectionIds());
             const valuesToHighlight = filterCategories.filter((category: PrimitiveValue, index: number) => {
                 const measureValue = measureValues[index];
@@ -81,7 +87,7 @@ export class Visual implements IVisual {
             
             });
 
-            console.log(valuesToHighlight)
+            // console.log(valuesToHighlight)
             let roomColorMap = {};
             colorCategories.forEach((item, index) => roomColorMap[item] = filterCategories[index]);
 
@@ -94,7 +100,7 @@ export class Visual implements IVisual {
                 return sorted;
             }
 // 
-            console.log(valuesToHighlight)
+            // console.log(valuesToHighlight)
             let isHighlighted = (obj) => {
                 let objectProp = _.get(obj.properties, filterCategoryAttributeName);
                 let idx = valuesToHighlight.indexOf(objectProp);
@@ -109,10 +115,10 @@ export class Visual implements IVisual {
             let getColor = obj => {
                 // console.log(obj);
                 let id = _.get(obj.properties, filterCategoryAttributeName)
-                console.log(id, obj.properties, filterCategoryAttributeName)
+                // console.log(id, obj.properties, filterCategoryAttributeName)
                 if (id) {
                     let idx = filterCategories.indexOf(id);
-                    console.log(id, idx);
+                    // console.log(id, idx);
                     if (idx !== -1) return this.colorPalette.getColor(colorCategories[idx]).value.replace("#","");
                     else return defaultRoomColor.replace("#","");
                 }
@@ -162,7 +168,8 @@ export class Visual implements IVisual {
                     getUniqueProps: getUniqueProps,
                     isHighlighted: isHighlighted,
                     hasHighlights: hasHighlights,
-                    sortObjs: sortObjs
+                    sortObjs: sortObjs,
+                    exportpdf: exportpdf
                 });
             }
         } else {
