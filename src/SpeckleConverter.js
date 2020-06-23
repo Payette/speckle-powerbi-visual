@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-
+import {SimplifyModifier} from './SimplifyModifier';
 class MaterialManager {
   constructor() {
     this.meshMaterialTable = []
@@ -55,13 +55,13 @@ class MaterialManager {
   }
 
   getLineMaterial(color) {
-    let c = colourNameToHex(color.hex)
-    if (c !== false) color.hex = c
+    // let c = color && color.hex && colourNameToHex(color.hex)
+    // if (c !== false) color.hex = c
     return new THREE.LineBasicMaterial({
-      color: new THREE.Color(color.hex),
-      linewidth: 1,
-      opacity: color.a,
-      transparent: true
+      color: new THREE.Color('#A9A9A9'),
+      linewidth: 4,
+      opacity: 100,
+      transparent: false
     })
   }
 
@@ -392,11 +392,12 @@ let Converter = {
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(obj.vertices, 3))
     geometry.computeFaceNormals()
     geometry.computeVertexNormals()
-
+    var edges = new THREE.BufferGeometry(geometry);
+    // var line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xffffff } ) );
     // let c = args.obj.color || '#ff0000'
     // let mesh = new THREE.Mesh( geometry, this.materialManager.getMeshMaterial( args.obj.color ) )
 
-    var material = new THREE.MeshBasicMaterial({ color: 0xffff00, side: THREE.DoubleSide });
+    var material = new THREE.MeshBasicMaterial({ color: 0xffff00, side: THREE.DoubleSide, wireframe:true, transparent:true});
     let mesh = new THREE.Mesh(geometry, material)
 
     // NOTE: needed to rematch with face arr colors

@@ -1,7 +1,6 @@
 import * as THREE from 'three'
 import _ from 'lodash'
 import OrbitControls from 'threejs-orbit-controls'
-
 import CH from 'color-hash'
 import TWEEN from '@tweenjs/tween.js'
 
@@ -484,10 +483,11 @@ export default class SpeckleRenderer extends EE {
 
   drawEdges(threeObj, id) {
     if (threeObj.type !== 'Mesh') return
-    var objEdges = new THREE.EdgesGeometry(threeObj.geometry, this.viewerSettings.edgesThreshold)
-    var edgeLines = new THREE.LineSegments(objEdges, new THREE.LineBasicMaterial({ color: 0x000000 }))
-    edgeLines.userData._id = id
-    this.edgesGroup.add(edgeLines)
+    // var objEdges = new THREE.EdgesGeometry(threeObj.geometry, this.viewerSettings.edgesThreshold)
+    // var edgeLines = new THREE.LineSegments(objEdges, new THREE.LineBasicMaterial({ color: 0x000000 }))
+    // edgeLines.material.userData._id = id;
+    // edgeLines.userData._id = id
+    // this.edgesGroup.add(edgeLines);
   }
 
   updateEdges() {
