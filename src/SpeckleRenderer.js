@@ -478,6 +478,9 @@ export default class SpeckleRenderer extends EE {
         this.computeSceneBoundingSphere()
         this.zoomExtents()
       }
+      if(this.hasHighlights){
+        this.zoomHighlightExtents();
+      }
     })
   }
 
@@ -554,6 +557,58 @@ export default class SpeckleRenderer extends EE {
       rotation: [this.camera.rotation.x, this.camera.rotation.y, this.camera.rotation.z],
       target: [this.sceneBoundingSphere.center.x, this.sceneBoundingSphere.center.y, this.sceneBoundingSphere.center.z]
     }, 450)
+  }
+
+  zoomHighlightExtents(){
+    this.computeHighlightBoundingSphere()
+    let offset = this.sceneHighlightBoundingSphere.radius / Math.tan(Math.PI / 180.0 * this.controls.object.fov * 0.5)
+    let vector = new THREE.Vector3(0, 0, 1)
+    let dir = vector.applyQuaternion(this.controls.object.quaternion);
+    let newPos = new THREE.Vector3()
+    dir.multiplyScalar(offset * 1.4)
+    newPos.addVectors(this.sceneHighlightBoundingSphere.center, dir)
+    this.setCamera({
+      position: [newPos.x, newPos.y, newPos.z],
+      rotation: [this.camera.rotation.x, this.camera.rotation.y, this.camera.rotation.z],
+      target: [this.sceneHighlightBoundingSphere.center.x, this.sceneHighlightBoundingSphere.center.y, this.sceneHighlightBoundingSphere.center.z]
+    }, 450)
+  }
+  
+
+  computeHighlightBoundingSphere(){
+    let center = null,
+    radius = 0,
+    k = 0
+
+    for (let obj of this.scene.children) {
+      if (!obj.userData._id) continue
+      if (!obj.geometry) continue
+      if (obj.material.transparent) continue;
+
+      if (k === 0) {
+        center = new THREE.Vector3(obj.geometry.boundingSphere.center.x, obj.geometry.boundingSphere.center.y, obj.geometry.boundingSphere.center.z)
+        radius = obj.geometry.boundingSphere.radius
+        k++
+        continue
+      }
+
+      let otherDist = obj.geometry.boundingSphere.radius + center.distanceTo(obj.geometry.boundingSphere.center)
+      if (radius < otherDist)
+        radius = otherDist
+
+      center.x += obj.geometry.boundingSphere.center.x
+      center.y += obj.geometry.boundingSphere.center.y
+      center.z += obj.geometry.boundingSphere.center.z
+      center.divideScalar(2)
+
+      k++
+    }
+
+    if (!center) {
+      center = new THREE.Vector3(0, 0, 0)
+    }
+
+    this.sceneHighlightBoundingSphere = { center: center ? center : new THREE.Vector3(), radius: radius > 1 ? radius * 1.1 : 100 }
   }
 
   computeSceneBoundingSphere() {
@@ -664,6 +719,7 @@ export default class SpeckleRenderer extends EE {
     this.selectionManager = viewerSettings.selectionManager;
     if(this.exportpdf && viewerSettings.exportpdf !== this.exportpdf) this.switchRenderer(viewerSettings.exportpdf)
     this.exportpdf = viewerSettings.exportpdf;
+    this.resetCamera(true);
   }
   
   switchRenderer(renderer){
@@ -695,6 +751,7 @@ export default class SpeckleRenderer extends EE {
     this.controls.enabled = true
     this.controls.screenSpacePanning = true
     this.controls.enableRotate = false
+    this.resetCamera();
 
     this.renderer.domElement.addEventListener('mousemove', this.onTouchMove.bind(this))
     this.renderer.domElement.addEventListener('touchmove', this.onTouchMove.bind(this))
@@ -704,6 +761,7 @@ export default class SpeckleRenderer extends EE {
 
     this.domObject.addEventListener('mouseover', this.enableEvents.bind(this))
     this.domObject.addEventListener('mouseout', this.disableEvents.bind(this))
+
   }
 
   setDefaultMeshMaterial() {

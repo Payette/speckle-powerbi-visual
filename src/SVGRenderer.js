@@ -15,7 +15,14 @@ import { Projector } from "./Projector.js";
 import { RenderableFace } from "./Projector.js";
 import { RenderableLine } from "./Projector.js";
 import { RenderableSprite } from "./Projector.js";
+import union from '@turf/union';
+import { multiPolygon, polygon } from '@turf/helpers';
+import * as martinez from 'martinez-polygon-clipping';
 
+import * as turf from '@turf/turf'
+import { Feature, Polygon, MultiPolygon, Properties } from '@turf/helpers';
+
+import * as _ from 'lodash';
 var SVGObject = function ( node ) {
 
 	Object3D.call( this );
@@ -143,7 +150,49 @@ var SVGRenderer = function () {
 		removeChildNodes();
 		_svg.style.backgroundColor = _clearColor.getStyle();
 
-	};
+    };
+    function groupByColor(elements){
+		// var onlyFaces = elements.filter(el => el instanceof RenderableFace);
+		var grouped = _.groupBy(elements, 'material.uuid');
+		grouped = Object.keys(grouped).map(group=>{
+			var polygons = [];
+			for(var face of grouped[group]){
+				var p = turf.polygon([[
+                    [face.v1.positionScreen.x * _svgWidthHalf, face.v1.positionScreen.y * - _svgHeightHalf],
+                    [face.v2.positionScreen.x * _svgWidthHalf, face.v2.positionScreen.y * - _svgHeightHalf],
+                    [face.v3.positionScreen.x * _svgWidthHalf, face.v3.positionScreen.y * - _svgHeightHalf],
+                    [face.v1.positionScreen.x * _svgWidthHalf, face.v1.positionScreen.y * - _svgHeightHalf]
+                ]]);
+                // console.log(p);
+                polygons.push(p);
+            }
+            // console.log(polygons);
+            if(polygons.length > 0){
+                // var start = martinez.union(polygons[0],polygons[1]);
+                // // console.log(start, polygons);
+                var unioned = turf.union(...polygons);
+                // console.log(unioned);
+                return {
+                    verts: unioned.geometry.coordinates[0],
+                    material:grouped[group][0].material
+                }
+            }
+         return null;
+		});
+		return grouped;
+    }
+    function pathFromVerts(points){
+		// let points = sortAndOrderPoints(points);
+
+		var pathString = "M";
+		pathString += points[0][0] +", " + points[0][1] +" ";
+		for(var i = 1; i < points.length; i++){
+			pathString += "L" + convert(points[i][0]) + "," + convert(points[i][1])+ " ";
+		}
+		pathString += "L" + convert(points[0][0]) + "," + convert(points[0][1])+ " ";
+		pathString += "z";
+		return pathString;
+	}
 
 	this.render = function ( scene, camera ) {
 
@@ -185,7 +234,21 @@ var SVGRenderer = function () {
 
 		_currentPath = '';
 		_currentStyle = '';
+        var faces = _elements.filter(e => e instanceof RenderableFace);
+        var grouped = groupByColor(faces);
 
+        for(var face of grouped){
+            // console.log(face.verts);
+            let path = pathFromVerts(face.verts);
+            
+            let style = 'fill:' + face.material.color.getStyle() + ';fill-opacity:' + face.material.opacity;
+            let _svgNode = getPathNode( _pathCount ++);
+			_svgNode.setAttribute( 'd', path );
+			_svgNode.setAttribute( 'style', style );
+            _svg.appendChild( _svgNode );
+            // console.log("Rendering", path);
+        }
+        
 		for ( var e = 0, el = _elements.length; e < el; e ++ ) {
 
 			var element = _elements[ e ];
@@ -213,7 +276,7 @@ var SVGRenderer = function () {
 
 				if ( _clipBox.intersectsBox( _elemBox ) === true ) {
 
-					renderLine( _v1, _v2, element, material );
+					// renderLine( _v1, _v2, element, material );
 
 				}
 
@@ -229,13 +292,13 @@ var SVGRenderer = function () {
 				_v2.positionScreen.x *= _svgWidthHalf; _v2.positionScreen.y *= - _svgHeightHalf;
 				_v3.positionScreen.x *= _svgWidthHalf; _v3.positionScreen.y *= - _svgHeightHalf;
 
-				if ( this.overdraw > 0 ) {
+				// if ( this.overdraw > 0 ) {
 
-					expand( _v1.positionScreen, _v2.positionScreen, this.overdraw );
-					expand( _v2.positionScreen, _v3.positionScreen, this.overdraw );
-					expand( _v3.positionScreen, _v1.positionScreen, this.overdraw );
+					// expand( _v1.positionScreen, _v2.positionScreen, -1 );
+					// expand( _v2.positionScreen, _v3.positionScreen, -1 );
+					// expand( _v3.positionScreen, _v1.positionScreen, -1 );
 
-				}
+				// }
 
 				_elemBox.setFromPoints( [
 					_v1.positionScreen,
@@ -245,7 +308,7 @@ var SVGRenderer = function () {
 
 				if ( _clipBox.intersectsBox( _elemBox ) === true ) {
 
-					renderFace3( _v1, _v2, _v3, element, material );
+					// renderFace3( _v1, _v2, _v3, element, material );
 
 				}
 
