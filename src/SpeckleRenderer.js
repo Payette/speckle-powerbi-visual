@@ -761,7 +761,6 @@ export default class SpeckleRenderer extends EE {
 
     if(renderer === "SVG"){
       this.domObject.appendChild(this.svgrenderer.domElement);
-      this.svgrenderer.setQuality('high');
       this.svgrenderer.lineWeight = this.viewerSettings.lineWeight;
       this.svgrenderer.lineColor = this.viewerSettings.lineColor;
       this.svgrenderer.setSize(this.domObject.offsetWidth, this.domObject.offsetHeight)
@@ -769,7 +768,6 @@ export default class SpeckleRenderer extends EE {
     }
     else {
       this.domObject.appendChild(this.webglrenderer.domElement);
-      // this.webglrenderer.setQuality('low');
       this.webglrenderer.setSize(this.domObject.offsetWidth, this.domObject.offsetHeight)
       this.renderer = this.webglrenderer;
     }    
