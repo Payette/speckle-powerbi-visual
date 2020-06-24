@@ -64,6 +64,7 @@ export class Visual implements IVisual {
             const object = this.settings.speckle;
 
             let defaultRoomColor = _.get(object, "defaultRoomColor");
+            let lineColor = _.get(object, 'lineColor');
             let exportpdf = _.get(object, 'exportpdf');
             // console.log(exportpdf);
 
@@ -169,7 +170,8 @@ export class Visual implements IVisual {
                     isHighlighted: isHighlighted,
                     hasHighlights: hasHighlights,
                     sortObjs: sortObjs,
-                    exportpdf: exportpdf
+                    exportpdf: exportpdf,
+                    lineColor: lineColor
                 });
             }
         } else {

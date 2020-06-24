@@ -77,6 +77,7 @@ var SVGRenderer = function () {
 
 	this.overdraw = 0.5;
 	this.lineWeight = 1;
+	this.lineColor = "#000000";
 
 	this.info = {
 
@@ -243,7 +244,7 @@ var SVGRenderer = function () {
             let path = pathFromVerts(face.verts);
             
 			let style = 'fill:' + face.material.color.getStyle() + ';fill-opacity:' + face.material.opacity + ';';
-			if(this.lineWeight > 0) style += 'stroke:black;stroke-width:'+this.lineWeight;
+			if(this.lineWeight > 0) style += 'stroke:'+this.lineColor+';'+'stroke-width:'+this.lineWeight;
             let _svgNode = getPathNode( _pathCount ++);
 			_svgNode.setAttribute( 'd', path );
 			_svgNode.setAttribute( 'style', style );

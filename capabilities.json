@@ -56,6 +56,17 @@
                         "numeric": true
                     }
                 },
+                "lineColor": {
+                    "displayName": "Line Color",
+                    "description": "Stroke Color when using SVGRenderer",
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
                 "camera": {
                     "displayName": "Camera",
                     "description": "The 3D camera perspective.",

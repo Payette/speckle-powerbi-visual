@@ -26,7 +26,8 @@ export interface State {
     colorPalette?: IColorPalette,
     hasHighlights?: any,
     sortObjs?: any,
-    exportpdf?: string
+    exportpdf?: string,
+    lineColor?: string
 }
 
 export const initialState: State = {
@@ -75,6 +76,7 @@ export class SpeckleVisual extends React.Component<{}, State>{
         ViewerSettings.exportpdf = this.state.exportpdf;
         ViewerSettings.defaultRoomColor = this.state.defaultRoomColor;
         ViewerSettings.lineWeight = this.state.lineWeight;
+        ViewerSettings.lineColor = this.state.lineColor;
         this.renderer = new SpeckleRenderer({ domObject: this.mount }, ViewerSettings)
         this.renderer.animate()
         this.grabSpeckleObjectsFromURLAndUpdate(this.state.speckleStreamURL)
@@ -102,6 +104,7 @@ export class SpeckleVisual extends React.Component<{}, State>{
         ViewerSettings.exportpdf = this.state.exportpdf;
         ViewerSettings.lineWeight = this.state.lineWeight;
         ViewerSettings.defaultRoomColor = this.state.defaultRoomColor;
+        ViewerSettings.lineColor = this.state.lineColor;
 
         this.renderer.updateViewerSettings(ViewerSettings)
         this.renderer.reloadObjects()

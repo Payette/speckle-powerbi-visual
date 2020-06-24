@@ -16,6 +16,7 @@ export class CircleSettings {
     public defaultRoomColor: string = "000000";
     public defaultOpacity: number = 0.75;
     public lineWeight: number = 1;
+    public lineColor: string = "000000";
     public camera: string = "perspective";
     public specklestreamurl: string = "";
     public getColor: (uniqueFICMs:any, obj: any) => any = undefined;
@@ -33,6 +34,7 @@ export class VisualSettings extends DataViewObjectsParser {
     public meshOverrides: any;
     public edgesThreshold: number;
     public defaultRoomColor: string;
+    public lineColor: string;
     // public exportpdf: string;
 }
 
@@ -56,6 +58,7 @@ export const ViewerSettings = {
     selectionManager: undefined,
     getUniqueProps: undefined,
     defaultRoomColor: "000000",
+    lineColor: "000000",
     defaultOpacity: 0.6,
     isHighlighted: undefined,
     colorPalette: undefined,
