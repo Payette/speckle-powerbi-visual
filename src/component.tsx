@@ -74,6 +74,7 @@ export class SpeckleVisual extends React.Component<{}, State>{
         ViewerSettings.sortObjs = this.state.sortObjs;
         ViewerSettings.exportpdf = this.state.exportpdf;
         ViewerSettings.defaultRoomColor = this.state.defaultRoomColor;
+        ViewerSettings.lineWeight = this.state.lineWeight;
         this.renderer = new SpeckleRenderer({ domObject: this.mount }, ViewerSettings)
         this.renderer.animate()
         this.grabSpeckleObjectsFromURLAndUpdate(this.state.speckleStreamURL)
@@ -99,6 +100,7 @@ export class SpeckleVisual extends React.Component<{}, State>{
         ViewerSettings.colorPalette = this.state.colorPalette;
         ViewerSettings.hasHighlights = this.state.hasHighlights;
         ViewerSettings.exportpdf = this.state.exportpdf;
+        ViewerSettings.lineWeight = this.state.lineWeight;
         ViewerSettings.defaultRoomColor = this.state.defaultRoomColor;
 
         this.renderer.updateViewerSettings(ViewerSettings)

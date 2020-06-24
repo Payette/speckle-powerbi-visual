@@ -1,5 +1,4 @@
 import * as THREE from 'three'
-import {SimplifyModifier} from './SimplifyModifier';
 class MaterialManager {
   constructor() {
     this.meshMaterialTable = []

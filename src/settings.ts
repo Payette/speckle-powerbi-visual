@@ -61,5 +61,6 @@ export const ViewerSettings = {
     colorPalette: undefined,
     hasHighlights: undefined,
     sortObjs: undefined,
-    exportpdf: "WebGL"
+    exportpdf: "WebGL",
+    lineWeight: 1
 }

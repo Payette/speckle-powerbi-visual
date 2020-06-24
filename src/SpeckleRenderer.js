@@ -742,6 +742,9 @@ export default class SpeckleRenderer extends EE {
     this.getSelectionID = viewerSettings.getSelectionID;
     this.sortObjs = viewerSettings.sortObjs;
     this.selectionManager = viewerSettings.selectionManager;
+    if(this.lineWeight && viewerSettings.lineWeight !== this.lineWeight) this.svgrenderer.lineWeight = viewerSettings.lineWeight;
+    this.lineWeight = viewerSettings.lineWeight;
+
     if(this.exportpdf && viewerSettings.exportpdf !== this.exportpdf) this.switchRenderer(viewerSettings.exportpdf)
     this.exportpdf = viewerSettings.exportpdf;
     this.resetCamera(true);
@@ -762,6 +765,7 @@ export default class SpeckleRenderer extends EE {
     if(renderer === "SVG"){
       this.domObject.appendChild(this.svgrenderer.domElement);
       this.svgrenderer.setQuality('high');
+      this.svgrenderer.lineWeight = this.viewerSettings.lineWeight;
       this.svgrenderer.setSize(this.domObject.offsetWidth, this.domObject.offsetHeight)
       this.renderer = this.svgrenderer;
     }

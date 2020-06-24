@@ -135,7 +135,7 @@ export class Visual implements IVisual {
                 // console.log(dataView.categorical.values[0]);
                 let propValue = _.get(obj.properties,filterCategoryAttributeName)
                 // console.log(dataView.categorical.categories[0].values)
-                let trueIndex = colorCategories.indexOf(propValue); 
+                let trueIndex = filterCategories.indexOf(propValue); 
                 // console.log(propValue, trueIndex);
                 return this.host.createSelectionIdBuilder().withCategory(dataView.categorical.categories[0],trueIndex).createSelectionId();
             }
