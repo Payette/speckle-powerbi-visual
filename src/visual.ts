@@ -66,29 +66,23 @@ export class Visual implements IVisual {
             let defaultRoomColor = _.get(object, "defaultRoomColor");
             let lineColor = _.get(object, 'lineColor');
             let exportpdf = _.get(object, 'exportpdf');
-            // console.log(exportpdf);
 
             let measureIndex = dataView.metadata.columns.findIndex(c=>c.isMeasure);
             let categoryIndex = dataView.metadata.columns.findIndex(c=>!c.isMeasure);
-            // console.log("measure",measureIndex," category", categoryIndex)
             let filterCategories = _.get(dataView, `categorical.categories[0].values`)
             let colorCategories = _.get(dataView, "categorical.values[0].values")
             let filterCategoryAttributeName = _.get(dataView, "metadata.columns["+categoryIndex+"].displayName")
             let colorCategoryAttributeName = _.get(dataView, "metadata.columns["+measureIndex+"].displayName")
-            // console.log(dataView.categorical.categories[0])
             const measures: DataViewValueColumn = dataView.categorical.values[0];
             const measureValues = measures.values;
             const measureHighlights = measures.highlights;
             console.log(dataView);
-            // console.log(this.selectionManager.getSelectionIds());
             const valuesToHighlight = filterCategories.filter((category: PrimitiveValue, index: number) => {
                 const measureValue = measureValues[index];
                 const measureHighlight = measureHighlights && measureHighlights[index] ? measureHighlights[index] : null;
                 return measureValue === measureHighlight
-            
             });
 
-            // console.log(valuesToHighlight)
             let roomColorMap = {};
             colorCategories.forEach((item, index) => roomColorMap[item] = filterCategories[index]);
 
@@ -100,7 +94,6 @@ export class Visual implements IVisual {
                 });
                 return sorted;
             }
-// 
             console.log("has highlights", valuesToHighlight.length > 0)
             let isHighlighted = (obj) => {
                 let objectProp = _.get(obj.properties, filterCategoryAttributeName);
@@ -111,15 +104,11 @@ export class Visual implements IVisual {
             let hasHighlights = () => {
                 return valuesToHighlight.length > 0;
             }
-            // let uniqueFICMs = [...new Set(dataView.categorical.values[0].values)]
             console.log(defaultRoomColor);
             let getColor = obj => {
-                // console.log(obj);
                 let id = _.get(obj.properties, filterCategoryAttributeName)
-                // console.log(id, obj.properties, filterCategoryAttributeName)
                 if (id) {
                     let idx = filterCategories.indexOf(id);
-                    // console.log(id, idx);
                     if (idx !== -1) return this.colorPalette.getColor(colorCategories[idx]).value.replace("#","");
                     else return defaultRoomColor.replace("#","");
                 }
@@ -133,15 +122,10 @@ export class Visual implements IVisual {
             }
 
             let getSelectionID = obj =>{
-                // console.log(dataView.categorical.values[0]);
                 let propValue = _.get(obj.properties,filterCategoryAttributeName)
-                // console.log(dataView.categorical.categories[0].values)
                 let trueIndex = filterCategories.indexOf(propValue); 
-                // console.log(propValue, trueIndex);
                 return this.host.createSelectionIdBuilder().withCategory(dataView.categorical.categories[0],trueIndex).createSelectionId();
             }
-
-            // console.log(colorCategories, colorValues, colorCategoryAttributeName)
 
             var speckleStreamURL = undefined
             try {

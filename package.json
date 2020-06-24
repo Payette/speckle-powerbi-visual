@@ -1,5 +1,5 @@
 {
-  "name": "circle-card-react",
+  "name": "speckle-visual",
   "scripts": {
     "pbiviz": "pbiviz",
     "start": "pbiviz start --port 8080",

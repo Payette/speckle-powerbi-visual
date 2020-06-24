@@ -33,7 +33,8 @@ export interface State {
 export const initialState: State = {
     speckleStreamURL: "",
     width: 200,
-    height: 200
+    height: 200,
+    exportpdf: "WebGL"
 }
 
 export class SpeckleVisual extends React.Component<{}, State>{

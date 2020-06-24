@@ -70,21 +70,16 @@ export default class SpeckleRenderer extends EE {
 
     this.viewerSettings = viewerSettings
     this.exportpdf = this.viewerSettings.exportpdf
-    // if(this.renderer) this.renderer.dispose();
-    // console.log(this.viewerSettings.exportpdf)
     this.webglrenderer = new THREE.WebGLRenderer( { alpha: true, antialias: true, logarithmicDepthBuffer: true } )
-    // this.renderer = new SVGRenderer();
     this.webglrenderer.setSize(this.domObject.offsetWidth, this.domObject.offsetHeight)
 
-    // this.renderer.setQuality('low')
     this.svgrenderer = new SVGRenderer();
+    this.svgrenderer.setSize(this.domObject.offsetWidth, this.domObject.offsetHeight)
     console.log(this.exportpdf)
-          // if(this.domObject) this.domObject.removeChild(this.svgrenderer.domElement);
     console.log("Setting webGL")
 
     this.domObject.appendChild(this.webglrenderer.domElement);
     this.renderer = this.webglrenderer;
-
     this.initialise()
   }
 
@@ -131,7 +126,7 @@ export default class SpeckleRenderer extends EE {
     this.scene.add(this.edgesGroup)
 
     this.updateViewerSettings(this.viewerSettings)
-
+    this.switchRenderer(this.viewerSettings.exportpdf)
     window.THREE = THREE
     window.Converter = Converter
 
