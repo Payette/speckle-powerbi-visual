@@ -474,13 +474,19 @@ export default class SpeckleRenderer extends EE {
         return
       }
 
-      if (zoomExtents && (index === objs.length - 1)) {
+      if(this.objs.filter(this.isHighlighted).length > 0){
+        let highlighted = this.objs.filter(this.isHighlighted)
+        // console.log(highlighted)
+        console.log("Zooming to highlights")
+        this.zoomHighlightExtents();
+      }
+
+      else if (zoomExtents && (index === objs.length - 1)) {
+        console.log("Zooming to filtered")
         this.computeSceneBoundingSphere()
         this.zoomExtents()
       }
-      if(this.hasHighlights){
-        this.zoomHighlightExtents();
-      }
+      
     })
   }
 
@@ -609,6 +615,22 @@ export default class SpeckleRenderer extends EE {
     }
 
     this.sceneHighlightBoundingSphere = { center: center ? center : new THREE.Vector3(), radius: radius > 1 ? radius * 1.1 : 100 }
+    // console.log(this.sceneHighlightBoundingSphere)
+  }
+
+  RGBToHex(color) {
+    let r = (color.r*255).toString(16);
+    let g = (color.g*255).toString(16);
+    let b = (color.b*255).toString(16);
+  
+    if (r.length == 1)
+      r = "0" + r;
+    if (g.length == 1)
+      g = "0" + g;
+    if (b.length == 1)
+      b = "0" + b;
+  
+    return r + g + b;
   }
 
   computeSceneBoundingSphere() {
@@ -619,6 +641,8 @@ export default class SpeckleRenderer extends EE {
     for (let obj of this.scene.children) {
       if (!obj.userData._id) continue
       if (!obj.geometry) continue
+      if(this.RGBToHex(obj.material.color) === this.viewerSettings.defaultRoomColor) continue;
+      // console.log(obj)
 
       if (k === 0) {
         center = new THREE.Vector3(obj.geometry.boundingSphere.center.x, obj.geometry.boundingSphere.center.y, obj.geometry.boundingSphere.center.z)
@@ -643,7 +667,8 @@ export default class SpeckleRenderer extends EE {
       center = new THREE.Vector3(0, 0, 0)
     }
 
-    this.sceneBoundingSphere = { center: center ? center : new THREE.Vector3(), radius: radius > 1 ? radius * 1.1 : 100 }
+    this.sceneBoundingSphere = { center: center ? center : new THREE.Vector3(), radius: radius > 1 ? radius * 1.1  : 100 }
+    console.log(this.sceneBoundingSphere)
   }
 
   setFar() {

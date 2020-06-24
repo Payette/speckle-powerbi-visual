@@ -100,7 +100,7 @@ export class Visual implements IVisual {
                 return sorted;
             }
 // 
-            // console.log(valuesToHighlight)
+            console.log("has highlights", valuesToHighlight.length > 0)
             let isHighlighted = (obj) => {
                 let objectProp = _.get(obj.properties, filterCategoryAttributeName);
                 let idx = valuesToHighlight.indexOf(objectProp);
