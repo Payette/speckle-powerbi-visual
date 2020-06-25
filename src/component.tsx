@@ -27,7 +27,8 @@ export interface State {
     hasHighlights?: any,
     sortObjs?: any,
     exportpdf?: string,
-    lineColor?: string
+    lineColor?: string,
+    cameraState?: any,
 }
 
 export const initialState: State = {
@@ -118,7 +119,7 @@ export class SpeckleVisual extends React.Component<{}, State>{
                 .then(data => {
                     let objs = data.resources;
                     this.renderer.unloadAllObjects()
-                    this.renderer.loadObjects({ objs: objs, zoomExtents: true })
+                    this.renderer.loadObjects({ objs: objs, zoomExtents: true, firstLoad: true })
                 })
                 .catch(error => {
                     console.error("Unable to fetch from URL", error)

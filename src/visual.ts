@@ -155,7 +155,7 @@ export class Visual implements IVisual {
                     hasHighlights: hasHighlights,
                     sortObjs: sortObjs,
                     exportpdf: exportpdf,
-                    lineColor: lineColor
+                    lineColor: lineColor,
                 });
             }
         } else {

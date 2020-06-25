@@ -7,7 +7,7 @@ import flatten from 'flat'
 import { Converter } from './SpeckleConverter.js'
 import SelectionBox from './SelectionBox.js'
 import SelectionHelper from './SelectionHelper.js'
-import {SVGRenderer} from './SVGRenderer.ts'
+import { SVGRenderer } from './SVGRenderer.ts'
 
 export default class SpeckleRenderer {
 
@@ -54,13 +54,13 @@ export default class SpeckleRenderer {
 
     this.viewerSettings = viewerSettings
     this.exportpdf = this.viewerSettings.exportpdf
-    this.webglrenderer = new THREE.WebGLRenderer( { alpha: true, antialias: true, logarithmicDepthBuffer: true } )
+    this.webglrenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, logarithmicDepthBuffer: true })
     this.webglrenderer.setSize(this.domObject.offsetWidth, this.domObject.offsetHeight)
 
     this.svgrenderer = new SVGRenderer();
     this.svgrenderer.setSize(this.domObject.offsetWidth, this.domObject.offsetHeight)
-    console.log(this.exportpdf)
-    console.log("Setting webGL")
+    // console.log(this.exportpdf)
+    // console.log("Setting webGL")
 
     this.domObject.appendChild(this.webglrenderer.domElement);
     this.renderer = this.webglrenderer;
@@ -74,9 +74,9 @@ export default class SpeckleRenderer {
     let axesHelper = new THREE.AxesHelper(10)
     this.scene.add(axesHelper)
     // Fake Ortho
-    this.camera = new THREE.PerspectiveCamera(1, this.domObject.offsetWidth / this.domObject.offsetHeight, 0.1, 100000);
-    this.resetCamera(false)
-    this.camera.isCurrent = true
+      this.camera = new THREE.PerspectiveCamera(1, this.domObject.offsetWidth / this.domObject.offsetHeight, 0.1, 100000);
+      this.resetCamera(false)
+      this.camera.isCurrent = true
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
     this.controls.enabled = true
@@ -84,8 +84,22 @@ export default class SpeckleRenderer {
     this.controls.enableRotate = false
 
     this.updateViewerSettings(this.viewerSettings)
+    this.webglrenderer.domElement.addEventListener('mousemove', this.onTouchMove.bind(this))
+    this.webglrenderer.domElement.addEventListener('touchmove', this.onTouchMove.bind(this))
+
+    this.webglrenderer.domElement.addEventListener('mousedown', this.mouseDown.bind(this))
+    this.webglrenderer.domElement.addEventListener('mouseup', this.mouseUp.bind(this))
+
+    this.svgrenderer.domElement.addEventListener('mousemove', this.onTouchMove.bind(this))
+    this.svgrenderer.domElement.addEventListener('touchmove', this.onTouchMove.bind(this))
+
+    this.svgrenderer.domElement.addEventListener('mousedown', this.mouseDown.bind(this))
+    this.svgrenderer.domElement.addEventListener('mouseup', this.mouseUp.bind(this))
+
+    this.domObject.addEventListener('mouseover', this.enableEvents.bind(this))
+    this.domObject.addEventListener('mouseout', this.disableEvents.bind(this))
     this.switchRenderer(this.viewerSettings.exportpdf)
-    this.resetCamera(true)
+    // this.resetCamera(true)
 
     this.raycaster = new THREE.Raycaster()
     this.mouse = new THREE.Vector2()
@@ -94,24 +108,48 @@ export default class SpeckleRenderer {
     this.selectionHelper = new SelectionHelper(this.selectionBox, this.renderer, "selectBox", this.controls, this.mouse)
 
     window.addEventListener('resize', this.resizeCanvas.bind(this), false)
-    this.renderer.domElement.addEventListener('mousemove', this.onTouchMove.bind(this))
-    this.renderer.domElement.addEventListener('touchmove', this.onTouchMove.bind(this))
-
-    this.renderer.domElement.addEventListener('mousedown', this.mouseDown.bind(this))
-    this.renderer.domElement.addEventListener('mouseup', this.mouseUp.bind(this))
-
-    this.domObject.addEventListener('mouseover', this.enableEvents.bind(this))
-    this.domObject.addEventListener('mouseout', this.disableEvents.bind(this))
 
     this.computeSceneBoundingSphere()
     this.render()
   }
 
+
+  updateObjectMaterials(isSingleClick) {
+    console.log(this.objs.filter(this.isHighlighted).length)
+    this.threeObjs.forEach(threeObj => {
+      if (!isSingleClick && this.objs.filter(this.isHighlighted).length > 0) {
+        if (!this.isHighlighted(threeObj)) {
+          this.selectedObjects = [];
+          threeObj.material.transparent = true;
+          threeObj.material.opacity = 0.1;
+        }
+        else {
+          threeObj.material.opacity = 1;
+          threeObj.material.transparent = false;
+        }
+      }
+      else if (this.selectedObjects.length > 0) {
+        // console.log(threeObj)
+
+        //There are selected ones
+        if (this.selectedObjects.findIndex(x => x.userData && x.userData._id === threeObj.userData._id) === -1) {
+          threeObj.material.transparent = true;
+          threeObj.material.opacity = 0.1;
+        }
+        else {
+          threeObj.material.opacity = 1;
+          threeObj.material.transparent = false
+        }
+
+      }
+      else { //Neither
+        threeObj.material.opacity = 1;
+        threeObj.material.transparent = false;
+      }
+    })
+  }
+
   resetCamera(zoomExtents = true) {
-    // this.camera.isCurrent = false;
-    // this.camera = new THREE.PerspectiveCamera(1, this.domObject.offsetWidth / this.domObject.offsetHeight, 0.1, 100000);
-    // this.resetCamera(false)
-    // this.camera.isCurrent = true
     if (this.viewerSettings.camera === "orthographic") {
       // Fake Ortho
       this.camera.fov = 1
@@ -130,7 +168,7 @@ export default class SpeckleRenderer {
     this.camera.position.z = 20
     this.camera.position.y = 20
     this.camera.position.x = 20
-    if(this.controls) this.controls.target = new THREE.Vector3(0,0,0);
+    if (this.controls) this.controls.target = new THREE.Vector3(0, 0, 0);
     if (zoomExtents) {
       this.computeSceneBoundingSphere()
       this.zoomExtents()
@@ -190,35 +228,37 @@ export default class SpeckleRenderer {
     // check if it's a single short click (as opposed to a longer difference caused by moving the orbit controls
     // or dragging the selection box)
     if (Date.now() - this.mouseDownTime < 300) {
+      console.log(this.selectedObjects);
       if (this.hoveredObject && this.selectedObjects.findIndex(x => x.userData._id === this.hoveredObject.userData._id) !== -1) {
         // Inside the selection -> check if it's a single object deselect
         console.log("Should remove")
-        if(this.selectedObjects.length === 1) this.clearSelection();
-        else this.removeFromSelection([this.hoveredObject]);
+        this.selectedObjects = [];
+        // else this.removeFromSelection([this.hoveredObject]);
         this.selectionManager.clear()
-        this.resetCamera(true);
-        this.updateObjectMaterials()
+        // this.resetCamera(false);
+        this.updateObjectMaterials(true)
 
       } else if (this.hoveredObject) {  //If the hoveredObject is already selected, then unselect it
 
         if (event.shiftKey) {
-          console.log('should add to selection')
+          // console.log('should add to selection')
           this.addToSelection([this.hoveredObject])
           this.selectionManager.select(_.get(this.hoveredObject, "userData.selectionID"), true)
         } else if (event.ctrlKey) {
-          console.log('should remove from selection')
+          // console.log('should remove from selection')
           this.removeFromSelection([this.hoveredObject])
+          this.updateObjectMaterials(true)
+
         } else {
-          console.log('single selection')
+          // console.log('single selection')
           let o = this.hoveredObject;
-          this.clearSelection()
-          this.addToSelection([o])
+          console.log(o);
+          this.selectedObjects = [o];
+          this.updateObjectMaterials(true);
           let selectedID = _.get(o, 'userData.selectionID');
           //https://discourse.threejs.org/t/changing-opacity-of-a-object-group/8783/2
 
           if(selectedID) this.selectionManager.select(selectedID)
-          this.updateObjectMaterials();
-          console.log(o);
 
         }
       } else this.clearSelection()
@@ -290,7 +330,7 @@ export default class SpeckleRenderer {
         added.push(obj.userData._id)
       }
     })
-    this.updateObjectMaterials()
+    this.updateObjectMaterials(true)
   }
 
   removeFromSelection(objects) {
@@ -303,20 +343,19 @@ export default class SpeckleRenderer {
         this.selectedObjects.splice(myIndex, 1)
       }
     })
-    this.updateObjectMaterials()
+    // this.updateObjectMaterials()
 
-    // this.resetCamera(false);
   }
 
   clearSelection() {
-    this.threeObjs.forEach(obj => {
-      obj.userData.selected = false
-      obj.material.transparent = false;
-      obj.material.opacity = 1;
-      if(obj.material.__preHoverColor) obj.material.color.copy(obj.material.__preHoverColor)
-    })
+    // this.threeObjs.forEach(obj => {
+    //   obj.userData.selected = false
+    //   obj.material.transparent = false;
+    //   obj.material.opacity = 1;
+    //   if(obj.material.__preHoverColor) obj.material.color.copy(obj.material.__preHoverColor)
+    // })
     this.selectedObjects = []
-    this.updateObjectMaterials()
+    // this.updateObjectMaterials()
   }
 
   reloadObjects() {
@@ -329,11 +368,11 @@ export default class SpeckleRenderer {
   // adds a bunch of speckle objects to the scene. handles conversion and
   // computes each objects's bounding sphere for faster zoom extents calculation
   // of the scene bounding sphere.
-  loadObjects({ objs, zoomExtents }) {
+  loadObjects({ objs, zoomExtents, firstLoad }) {
     this.objs = objs
     //For some reason I think we need to sort by room first 
-    let sorted = this.sortObjs(objs); 
-    if(this.hasHighlights()) this.clearSelection();
+    let sorted = this.sortObjs(objs);
+    if (this.hasHighlights()) this.clearSelection();
     sorted.forEach((obj, index) => {
       try {
         let splitType = obj.type.split("/")
@@ -352,11 +391,11 @@ export default class SpeckleRenderer {
           Converter[convertType]({ obj: obj }, (err, threeObj) => {
             if (myColor) threeObj.material = new THREE.MeshBasicMaterial({ color: myColor, side: THREE.DoubleSide })
             // console.log(this.selectedObjects)
-            if ((!this.isHighlighted(obj) && this.hasHighlights()) || (this.selectedObjects.length > 0 && this.selectedObjects.findIndex(x => x.userData && x.userData._id === obj._id) === -1)){
+            if ((!this.isHighlighted(obj) && this.hasHighlights()) || (this.selectedObjects.length > 0 && this.selectedObjects.findIndex(x => x.userData && x.userData._id === obj._id) === -1)) {
               threeObj.material.transparent = true;
-              threeObj.material.opacity = 0.1; 
+              threeObj.material.opacity = 0.1;
             }
-            else if(this.isHighlighted(obj)) threeObj.material.transparent = false;
+            else if (this.isHighlighted(obj)) threeObj.material.transparent = false;
             threeObj.userData._id = obj._id
             threeObj.userData.selectionID = this.getSelectionID(obj);
             threeObj.userData.properties = obj.properties ? flatten(obj.properties, { safe: true }) : null
@@ -370,23 +409,24 @@ export default class SpeckleRenderer {
         }
       } catch (e) {
         console.warn(`Something went wrong in the conversion of ${obj._id} (${obj.type})`)
-        console.log(obj)
-        console.log(e)
+        // console.log(obj)
+        // console.log(e)
         return
       }
 
-      if(this.objs.filter(this.isHighlighted).length > 0){
-        console.log("Zooming to highlights")
+      if (this.objs.filter(this.isHighlighted).length > 0) {
+        // console.log("Zooming to highlights")
         this.zoomHighlightExtents();
       }
 
       else if (zoomExtents && (index === objs.length - 1)) {
-        console.log("Zooming to filtered")
+        // console.log("Zooming to filtered")
         this.computeSceneBoundingSphere()
         this.resetCamera(true)
         // this.zoomExtents()
+        if(this.selectedObjects.length > 0) this.zoomToObject(this.selectedObjects[0])
       }
-      
+
     })
   }
 
@@ -409,15 +449,6 @@ export default class SpeckleRenderer {
     })
   }
 
-  updateObjectMaterials(){
-    this.threeObjs.forEach(threeObj => {
-      console.log(this.selectedObjects)
-      if ((!this.isHighlighted(threeObj) && this.hasHighlights()) || (this.selectedObjects.length > 0 && this.selectedObjects.findIndex(x => x.userData && x.userData._id === threeObj.userData._id) === -1)){
-        threeObj.material.transparent = true;
-        threeObj.material.opacity = 0.1; 
-      }
-    })
-  }
 
   zoomToObject(obj) {
     if (typeof obj === 'string') {
@@ -455,7 +486,7 @@ export default class SpeckleRenderer {
     }, 450)
   }
 
-  zoomHighlightExtents(){
+  zoomHighlightExtents() {
     this.computeHighlightBoundingSphere()
     let offset = this.sceneBoundingSphere.radius / Math.tan(Math.PI / 180.0 * this.controls.object.fov * 0.5)
     let vector = new THREE.Vector3(0, 0, 1)
@@ -470,26 +501,26 @@ export default class SpeckleRenderer {
       target: [this.sceneBoundingSphere.center.x, this.sceneBoundingSphere.center.y, this.sceneBoundingSphere.center.z]
     }, 450)
   }
-  
 
-  computeHighlightBoundingSphere(){
+
+  computeHighlightBoundingSphere() {
     let filter = obj => {
       if (!obj.userData._id) return false;
       if (!obj.geometry) return false;
       if (obj.material.transparent) return false;
       return true;
     }
-   
+
     this.sceneBoundingSphere = this.computeBoundingSphere(filter);
   }
 
-  computeBoundingSphere(filter){
+  computeBoundingSphere(filter) {
     let center = null,
-    radius = 0,
-    k = 0
+      radius = 0,
+      k = 0
 
     for (let obj of this.scene.children) {
-      if(!filter(obj)) continue;
+      if (!filter(obj)) continue;
 
       if (k === 0) {
         center = new THREE.Vector3(obj.geometry.boundingSphere.center.x, obj.geometry.boundingSphere.center.y, obj.geometry.boundingSphere.center.z)
@@ -499,7 +530,7 @@ export default class SpeckleRenderer {
       }
 
       let otherDist = obj.geometry.boundingSphere.radius + center.distanceTo(obj.geometry.boundingSphere.center)
-      if (radius < otherDist) radius = otherDist 
+      if (radius < otherDist) radius = otherDist
 
       center.x += obj.geometry.boundingSphere.center.x
       center.y += obj.geometry.boundingSphere.center.y
@@ -514,25 +545,25 @@ export default class SpeckleRenderer {
   }
 
   RGBToHex(color) {
-    let r = (color.r*255).toString(16);
-    let g = (color.g*255).toString(16);
-    let b = (color.b*255).toString(16);
-  
+    let r = (color.r * 255).toString(16);
+    let g = (color.g * 255).toString(16);
+    let b = (color.b * 255).toString(16);
+
     if (r.length == 1) r = "0" + r;
     if (g.length == 1) g = "0" + g;
     if (b.length == 1) b = "0" + b;
-  
+
     return r + g + b;
   }
 
   computeSceneBoundingSphere() {
-    let filter = obj =>{
+    let filter = obj => {
       if (!obj.userData._id) return false;
       if (!obj.geometry) return false;
-      if(this.RGBToHex(obj.material.color) === this.viewerSettings.defaultRoomColor) return false;
+      if (this.RGBToHex(obj.material.color) === this.viewerSettings.defaultRoomColor) return false;
       return true;
     }
-    
+
     this.sceneBoundingSphere = this.computeBoundingSphere(filter);
   }
 
@@ -552,8 +583,8 @@ export default class SpeckleRenderer {
     // controls center
     new TWEEN.Tween(self.controls.target).to({ x: where.target[0], y: where.target[1], z: where.target[2] }, duration).onUpdate(() => {
       self.controls.update();
-      if (this.x === where.target[0])
-        console.log('camera finished stuff')
+      // if (this.x === where.target[0])
+      // console.log('camera finished stuff')
     }).easing(TWEEN.Easing.Quadratic.InOut).start()
   }
 
@@ -569,29 +600,20 @@ export default class SpeckleRenderer {
     this.getSelectionID = viewerSettings.getSelectionID;
     this.sortObjs = viewerSettings.sortObjs;
     this.selectionManager = viewerSettings.selectionManager;
-    if(this.lineWeight && viewerSettings.lineWeight !== this.lineWeight) this.svgrenderer.lineWeight = viewerSettings.lineWeight;
-    if(this.lineColor && viewerSettings.lineColor !== this.lineColor) this.svgrenderer.lineColor = viewerSettings.lineColor;
+    if (this.lineWeight && viewerSettings.lineWeight !== this.lineWeight) this.svgrenderer.lineWeight = viewerSettings.lineWeight;
+    if (this.lineColor && viewerSettings.lineColor !== this.lineColor) this.svgrenderer.lineColor = viewerSettings.lineColor;
 
     this.lineWeight = viewerSettings.lineWeight;
     this.lineColor = viewerSettings.lineColor;
-    if(this.exportpdf && viewerSettings.exportpdf !== this.exportpdf) this.switchRenderer(viewerSettings.exportpdf)
+    if (this.exportpdf && viewerSettings.exportpdf !== this.exportpdf) this.switchRenderer(viewerSettings.exportpdf)
     this.exportpdf = viewerSettings.exportpdf;
-    this.resetCamera(true);
+    // this.resetCamera(true);
   }
-  
-  switchRenderer(renderer){
-    if(this.domObject) this.domObject.removeChild(this.domObject.childNodes[0]);
-    console.log("Setting ", renderer)
-    this.renderer.domElement.removeEventListener('mousemove', this.onTouchMove.bind(this))
-    this.renderer.domElement.removeEventListener('touchmove', this.onTouchMove.bind(this))
 
-    this.renderer.domElement.removeEventListener('mousedown', this.mouseDown.bind(this))
-    this.renderer.domElement.removeEventListener('mouseup', this.mouseUp.bind(this))
+  switchRenderer(renderer) {
+    if (this.domObject) this.domObject.removeChild(this.domObject.childNodes[0]);
 
-    this.domObject.removeEventListener('mouseover', this.enableEvents.bind(this))
-    this.domObject.removeEventListener('mouseout', this.disableEvents.bind(this))
-
-    if(renderer === "SVG"){
+    if (renderer === "SVG") {
       this.domObject.appendChild(this.svgrenderer.domElement);
       this.svgrenderer.lineWeight = this.viewerSettings.lineWeight;
       this.svgrenderer.lineColor = this.viewerSettings.lineColor;
@@ -602,23 +624,12 @@ export default class SpeckleRenderer {
       this.domObject.appendChild(this.webglrenderer.domElement);
       this.webglrenderer.setSize(this.domObject.offsetWidth, this.domObject.offsetHeight)
       this.renderer = this.webglrenderer;
-    }    
+    }
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
     this.controls.enabled = true
     this.controls.screenSpacePanning = true
     this.controls.enableRotate = false
-    this.resetCamera();
-
-    this.renderer.domElement.addEventListener('mousemove', this.onTouchMove.bind(this))
-    this.renderer.domElement.addEventListener('touchmove', this.onTouchMove.bind(this))
-
-    this.renderer.domElement.addEventListener('mousedown', this.mouseDown.bind(this))
-    this.renderer.domElement.addEventListener('mouseup', this.mouseUp.bind(this))
-
-    this.domObject.addEventListener('mouseover', this.enableEvents.bind(this))
-    this.domObject.addEventListener('mouseout', this.disableEvents.bind(this))
-
   }
 
   setDefaultMeshMaterial() {
@@ -633,10 +644,3 @@ export default class SpeckleRenderer {
     obj.material.needsUpdate = true
   }
 }
-function setOpacity(obj, opacity ) {
-  obj.children.forEach(child=> setOpacity(child, opacity));
-  if(obj.material) {
-    obj.material.transparent = true;  
-    obj.material.opacity = opacity;
-  };
-};
