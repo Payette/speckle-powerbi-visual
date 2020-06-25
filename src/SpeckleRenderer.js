@@ -423,8 +423,8 @@ export default class SpeckleRenderer {
         // console.log("Zooming to filtered")
         this.computeSceneBoundingSphere()
         this.resetCamera(true)
-        // this.zoomExtents()
-        if(this.selectedObjects.length > 0) this.zoomToObject(this.selectedObjects[0])
+        this.zoomHighlightExtents()
+        // if(this.selectedObjects.length > 0) this.zoomToObject(this.selectedObjects[0])
       }
 
     })
