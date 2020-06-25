@@ -71,6 +71,8 @@ export default class SpeckleRenderer {
 
     this.scene = new THREE.Scene()
 
+    let axesHelper = new THREE.AxesHelper(10)
+    this.scene.add(axesHelper)
     // Fake Ortho
     this.camera = new THREE.PerspectiveCamera(1, this.domObject.offsetWidth / this.domObject.offsetHeight, 0.1, 100000);
     this.resetCamera(false)
@@ -184,15 +186,17 @@ export default class SpeckleRenderer {
     // check if it's a single short click (as opposed to a longer difference caused by moving the orbit controls
     // or dragging the selection box)
     if (Date.now() - this.mouseDownTime < 300) {
-      if(this.hoveredObject.userData.selected) {
-        console.log("Should be removing")
+      // if(this.hoveredObject.userData.selected) {
+      //   console.log("Should be removing")
+      //   if(this.selectedObjects.length === 1) this.clearSelection();
+      //   else this.removeFromSelection([this.hoveredObject]);
+      // }
+      if (this.hoveredObject && this.selectedObjects.findIndex(x => x.userData._id === this.hoveredObject.userData._id) !== -1) {
+        // Inside the selection -> check if it's a single object deselect
+        console.log("Should remove")
         if(this.selectedObjects.length === 1) this.clearSelection();
         else this.removeFromSelection([this.hoveredObject]);
-      }
-      else if (this.hoveredObject && this.selectedObjects.findIndex(x => x.userData._id === this.hoveredObject.userData._id) !== -1) {
-        // Inside the selection -> check if it's a single object deselect
-        if (event.ctrlKey) this.removeFromSelection([this.hoveredObject]);
-
+        this.updateObjectMaterials()
       } else if (this.hoveredObject) { // if there is a hovered object...
         //If the hoveredObject is already selected, then unselect it
 
@@ -211,11 +215,8 @@ export default class SpeckleRenderer {
           let selectedID = _.get(o, 'userData.selectionID');
           //https://discourse.threejs.org/t/changing-opacity-of-a-object-group/8783/2
 
-          if(selectedID) this.selectionManager.select(selectedID).then(ids =>{
-            setOpacity(this.scene, ids.length > 0 ? 0.1 : 1);
-            o.material.transparent = false;
-            o.material.opacity = 1;
-          })
+          if(selectedID) this.selectionManager.select(selectedID)
+          this.updateObjectMaterials();
           console.log(o);
 
         }
@@ -288,6 +289,7 @@ export default class SpeckleRenderer {
         added.push(obj.userData._id)
       }
     })
+    this.updateObjectMaterials()
   }
 
   removeFromSelection(objects) {
@@ -300,6 +302,9 @@ export default class SpeckleRenderer {
         this.selectedObjects.splice(myIndex, 1)
       }
     })
+    this.updateObjectMaterials()
+
+    // this.resetCamera(false);
   }
 
   clearSelection() {
@@ -309,7 +314,9 @@ export default class SpeckleRenderer {
       obj.material.opacity = 1;
       if(obj.material.__preHoverColor) obj.material.color.copy(obj.material.__preHoverColor)
     })
+    this.selectionManager.clear()
     this.selectedObjects = []
+    this.updateObjectMaterials()
   }
 
   reloadObjects() {
@@ -343,7 +350,8 @@ export default class SpeckleRenderer {
           }
           Converter[convertType]({ obj: obj }, (err, threeObj) => {
             if (myColor) threeObj.material = new THREE.MeshBasicMaterial({ color: myColor, side: THREE.DoubleSide })
-            if (!this.isHighlighted(obj) && this.hasHighlights()){
+            console.log(this.selectedObjects)
+            if ((!this.isHighlighted(obj) && this.hasHighlights()) || (this.selectedObjects.length > 0 && this.selectedObjectsfindIndex(x => x.userData._id === obj.userData._id) === -1)){
               threeObj.material.transparent = true;
               threeObj.material.opacity = 0.1; 
             }
@@ -395,6 +403,16 @@ export default class SpeckleRenderer {
       if (index === toRemove.length - 1) {
         this.computeSceneBoundingSphere()
         this.zoomExtents()
+      }
+    })
+  }
+
+  updateObjectMaterials(){
+    this.threeObjs.forEach(threeObj => {
+      console.log(this.selectedObjects)
+      if ((!this.isHighlighted(threeObj) && this.hasHighlights()) || (this.selectedObjects.length > 0 && this.selectedObjects.findIndex(x => x.userData._id === threeObj.userData._id) === -1)){
+        threeObj.material.transparent = true;
+        threeObj.material.opacity = 0.1; 
       }
     })
   }
