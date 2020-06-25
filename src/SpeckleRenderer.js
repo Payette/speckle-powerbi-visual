@@ -108,6 +108,10 @@ export default class SpeckleRenderer {
   }
 
   resetCamera(zoomExtents = true) {
+    // this.camera.isCurrent = false;
+    // this.camera = new THREE.PerspectiveCamera(1, this.domObject.offsetWidth / this.domObject.offsetHeight, 0.1, 100000);
+    // this.resetCamera(false)
+    // this.camera.isCurrent = true
     if (this.viewerSettings.camera === "orthographic") {
       // Fake Ortho
       this.camera.fov = 1
@@ -126,7 +130,7 @@ export default class SpeckleRenderer {
     this.camera.position.z = 20
     this.camera.position.y = 20
     this.camera.position.x = 20
-
+    if(this.controls) this.controls.target = new THREE.Vector3(0,0,0);
     if (zoomExtents) {
       this.computeSceneBoundingSphere()
       this.zoomExtents()
@@ -301,7 +305,7 @@ export default class SpeckleRenderer {
     })
     this.updateObjectMaterials()
 
-    this.resetCamera(false);
+    // this.resetCamera(false);
   }
 
   clearSelection() {
