@@ -192,6 +192,7 @@ export default class SpeckleRenderer {
         if(this.selectedObjects.length === 1) this.clearSelection();
         else this.removeFromSelection([this.hoveredObject]);
         this.selectionManager.clear()
+        this.resetCamera(true);
         this.updateObjectMaterials()
 
       } else if (this.hoveredObject) {  //If the hoveredObject is already selected, then unselect it
@@ -347,7 +348,7 @@ export default class SpeckleRenderer {
           Converter[convertType]({ obj: obj }, (err, threeObj) => {
             if (myColor) threeObj.material = new THREE.MeshBasicMaterial({ color: myColor, side: THREE.DoubleSide })
             // console.log(this.selectedObjects)
-            if ((!this.isHighlighted(obj) && this.hasHighlights()) || (this.selectedObjects.length > 0 && this.selectedObjects.findIndex(x => x.userData && x.userData._id === obj.userData._id) === -1)){
+            if ((!this.isHighlighted(obj) && this.hasHighlights()) || (this.selectedObjects.length > 0 && this.selectedObjects.findIndex(x => x.userData && x.userData._id === obj._id) === -1)){
               threeObj.material.transparent = true;
               threeObj.material.opacity = 0.1; 
             }
@@ -452,17 +453,17 @@ export default class SpeckleRenderer {
 
   zoomHighlightExtents(){
     this.computeHighlightBoundingSphere()
-    let offset = this.sceneHighlightBoundingSphere.radius / Math.tan(Math.PI / 180.0 * this.controls.object.fov * 0.5)
+    let offset = this.sceneBoundingSphere.radius / Math.tan(Math.PI / 180.0 * this.controls.object.fov * 0.5)
     let vector = new THREE.Vector3(0, 0, 1)
     let dir = vector.applyQuaternion(this.controls.object.quaternion);
     let newPos = new THREE.Vector3()
     dir.multiplyScalar(offset)
-    newPos.addVectors(this.sceneHighlightBoundingSphere.center, dir)
+    newPos.addVectors(this.sceneBoundingSphere.center, dir)
     // newPos.x -= 10000;
     this.setCamera({
       position: [newPos.x, newPos.y, newPos.z],
       rotation: [this.camera.rotation.x, this.camera.rotation.y, this.camera.rotation.z],
-      target: [this.sceneHighlightBoundingSphere.center.x, this.sceneHighlightBoundingSphere.center.y, this.sceneHighlightBoundingSphere.center.z]
+      target: [this.sceneBoundingSphere.center.x, this.sceneBoundingSphere.center.y, this.sceneBoundingSphere.center.z]
     }, 450)
   }
   
@@ -475,7 +476,7 @@ export default class SpeckleRenderer {
       return true;
     }
    
-    this.sceneHighlightBoundingSphere = this.computeBoundingSphere(filter);
+    this.sceneBoundingSphere = this.computeBoundingSphere(filter);
   }
 
   computeBoundingSphere(filter){
