@@ -498,7 +498,8 @@ export default class SpeckleRenderer {
   }
 
   computeBoundingSphere(filter) {
-    let center = null,
+    let max = new THREE.Vector3(0,0,0),
+      min = new THREE.Vector3(0,0,0),
       radius = 0,
       k = 0
 
@@ -506,25 +507,27 @@ export default class SpeckleRenderer {
       if (!filter(obj)) continue;
 
       if (k === 0) {
-        center = new THREE.Vector3(obj.geometry.boundingSphere.center.x, obj.geometry.boundingSphere.center.y, obj.geometry.boundingSphere.center.z)
+        max = new THREE.Vector3(obj.geometry.boundingSphere.center.x + obj.geometry.boundingSphere.radius, obj.geometry.boundingSphere.center.y + obj.geometry.boundingSphere.radius, obj.geometry.boundingSphere.center.z + obj.geometry.boundingSphere.radius)
+        min = new THREE.Vector3(obj.geometry.boundingSphere.center.x - obj.geometry.boundingSphere.radius, obj.geometry.boundingSphere.center.y - obj.geometry.boundingSphere.radius, obj.geometry.boundingSphere.center.z - obj.geometry.boundingSphere.radius)
         radius = obj.geometry.boundingSphere.radius
         k++
         continue
       }
 
-      let otherDist = obj.geometry.boundingSphere.radius + center.distanceTo(obj.geometry.boundingSphere.center)
-      if (radius < otherDist) radius = otherDist
+      max.x = Math.max(max.x, obj.geometry.boundingSphere.center.x + obj.geometry.boundingSphere.radius)
+      max.y = Math.max(max.y, obj.geometry.boundingSphere.center.y + obj.geometry.boundingSphere.radius)
+      max.z = Math.max(max.z, obj.geometry.boundingSphere.center.z + obj.geometry.boundingSphere.radius)
 
-      center.x += obj.geometry.boundingSphere.center.x
-      center.y += obj.geometry.boundingSphere.center.y
-      center.z += obj.geometry.boundingSphere.center.z
-      center.divideScalar(2)
+      min.x = Math.min(min.x, obj.geometry.boundingSphere.center.x - obj.geometry.boundingSphere.radius)
+      min.y = Math.min(min.y, obj.geometry.boundingSphere.center.y - obj.geometry.boundingSphere.radius)
+      min.z = Math.min(min.z, obj.geometry.boundingSphere.center.z - obj.geometry.boundingSphere.radius)
 
       k++
     }
-
-    if (!center) center = new THREE.Vector3(0, 0, 0)
-    return { center: center ? center : new THREE.Vector3(), radius: radius > 1 ? radius * 1.2 : 100 }
+    let bigRadius = Math.max(max.x - min.x, max.y - min.y, max.z - min.z) / 2;
+    
+    let center = new THREE.Vector3((max.x + min.x)/2, (max.y + min.y)/2, (max.z + min.z) /2)
+    return { center: center ? center : new THREE.Vector3(), radius: bigRadius * 1.6 }
   }
 
   RGBToHex(color) {
