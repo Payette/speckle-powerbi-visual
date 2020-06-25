@@ -191,6 +191,7 @@ export default class SpeckleRenderer {
         console.log("Should remove")
         if(this.selectedObjects.length === 1) this.clearSelection();
         else this.removeFromSelection([this.hoveredObject]);
+        this.selectionManager.clear()
         this.updateObjectMaterials()
 
       } else if (this.hoveredObject) {  //If the hoveredObject is already selected, then unselect it
@@ -309,7 +310,6 @@ export default class SpeckleRenderer {
       obj.material.opacity = 1;
       if(obj.material.__preHoverColor) obj.material.color.copy(obj.material.__preHoverColor)
     })
-    this.selectionManager.clear()
     this.selectedObjects = []
     this.updateObjectMaterials()
   }
@@ -328,6 +328,7 @@ export default class SpeckleRenderer {
     this.objs = objs
     //For some reason I think we need to sort by room first 
     let sorted = this.sortObjs(objs); 
+    if(this.hasHighlights()) this.clearSelection();
     sorted.forEach((obj, index) => {
       try {
         let splitType = obj.type.split("/")
@@ -346,7 +347,7 @@ export default class SpeckleRenderer {
           Converter[convertType]({ obj: obj }, (err, threeObj) => {
             if (myColor) threeObj.material = new THREE.MeshBasicMaterial({ color: myColor, side: THREE.DoubleSide })
             // console.log(this.selectedObjects)
-            if ((!this.isHighlighted(obj) && this.hasHighlights()) || (this.selectedObjects.length > 0 && this.selectedObjectsfindIndex(x => x.userData._id === obj.userData._id) === -1)){
+            if ((!this.isHighlighted(obj) && this.hasHighlights()) || (this.selectedObjects.length > 0 && this.selectedObjects.findIndex(x => x.userData && x.userData._id === obj.userData._id) === -1)){
               threeObj.material.transparent = true;
               threeObj.material.opacity = 0.1; 
             }
@@ -406,7 +407,7 @@ export default class SpeckleRenderer {
   updateObjectMaterials(){
     this.threeObjs.forEach(threeObj => {
       console.log(this.selectedObjects)
-      if ((!this.isHighlighted(threeObj) && this.hasHighlights()) || (this.selectedObjects.length > 0 && this.selectedObjects.findIndex(x => x.userData._id === threeObj.userData._id) === -1)){
+      if ((!this.isHighlighted(threeObj) && this.hasHighlights()) || (this.selectedObjects.length > 0 && this.selectedObjects.findIndex(x => x.userData && x.userData._id === threeObj.userData._id) === -1)){
         threeObj.material.transparent = true;
         threeObj.material.opacity = 0.1; 
       }
