@@ -76,7 +76,6 @@ export class Visual implements IVisual {
             const measures: DataViewValueColumn = dataView.categorical.values[0];
             const measureValues = measures.values;
             const measureHighlights = measures.highlights;
-            console.log(dataView);
             const valuesToHighlight = filterCategories.filter((category: PrimitiveValue, index: number) => {
                 const measureValue = measureValues[index];
                 const measureHighlight = measureHighlights && measureHighlights[index] ? measureHighlights[index] : null;
@@ -94,7 +93,6 @@ export class Visual implements IVisual {
                 });
                 return sorted;
             }
-            console.log("has highlights", valuesToHighlight.length > 0)
             let isHighlighted = (obj) => {
                 let objectProp = _.get(obj.properties, filterCategoryAttributeName);
                 let idx = valuesToHighlight.indexOf(objectProp);
@@ -104,7 +102,6 @@ export class Visual implements IVisual {
             let hasHighlights = () => {
                 return valuesToHighlight.length > 0;
             }
-            console.log(defaultRoomColor);
             let getColor = obj => {
                 let id = _.get(obj.properties, filterCategoryAttributeName)
                 if (id) {
@@ -112,7 +109,6 @@ export class Visual implements IVisual {
                     if (idx !== -1) return this.colorPalette.getColor(colorCategories[idx]).value.replace("#","");
                     else return defaultRoomColor.replace("#","");
                 }
-                console.log(obj, "Default color");
                 return defaultRoomColor.replace("#","");
             }
             

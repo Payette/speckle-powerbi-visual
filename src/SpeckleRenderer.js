@@ -59,8 +59,6 @@ export default class SpeckleRenderer {
 
     this.svgrenderer = new SVGRenderer();
     this.svgrenderer.setSize(this.domObject.offsetWidth, this.domObject.offsetHeight)
-    // console.log(this.exportpdf)
-    // console.log("Setting webGL")
 
     this.domObject.appendChild(this.webglrenderer.domElement);
     this.renderer = this.webglrenderer;
@@ -115,7 +113,6 @@ export default class SpeckleRenderer {
 
 
   updateObjectMaterials(isSingleClick) {
-    console.log(this.objs.filter(this.isHighlighted).length)
     this.threeObjs.forEach(threeObj => {
       if (!isSingleClick && this.objs.filter(this.isHighlighted).length > 0) {
         if (!this.isHighlighted(threeObj)) {
@@ -129,7 +126,6 @@ export default class SpeckleRenderer {
         }
       }
       else if (this.selectedObjects.length > 0) {
-        // console.log(threeObj)
 
         //There are selected ones
         if (this.selectedObjects.findIndex(x => x.userData && x.userData._id === threeObj.userData._id) === -1) {
@@ -228,31 +224,23 @@ export default class SpeckleRenderer {
     // check if it's a single short click (as opposed to a longer difference caused by moving the orbit controls
     // or dragging the selection box)
     if (Date.now() - this.mouseDownTime < 300) {
-      console.log(this.selectedObjects);
       if (this.hoveredObject && this.selectedObjects.findIndex(x => x.userData._id === this.hoveredObject.userData._id) !== -1) {
         // Inside the selection -> check if it's a single object deselect
-        console.log("Should remove")
         this.selectedObjects = [];
-        // else this.removeFromSelection([this.hoveredObject]);
         this.selectionManager.clear()
-        // this.resetCamera(false);
         this.updateObjectMaterials(true)
 
       } else if (this.hoveredObject) {  //If the hoveredObject is already selected, then unselect it
 
         if (event.shiftKey) {
-          // console.log('should add to selection')
           this.addToSelection([this.hoveredObject])
           this.selectionManager.select(_.get(this.hoveredObject, "userData.selectionID"), true)
         } else if (event.ctrlKey) {
-          // console.log('should remove from selection')
           this.removeFromSelection([this.hoveredObject])
           this.updateObjectMaterials(true)
 
         } else {
-          // console.log('single selection')
           let o = this.hoveredObject;
-          console.log(o);
           this.selectedObjects = [o];
           this.updateObjectMaterials(true);
           let selectedID = _.get(o, 'userData.selectionID');
@@ -390,7 +378,6 @@ export default class SpeckleRenderer {
           }
           Converter[convertType]({ obj: obj }, (err, threeObj) => {
             if (myColor) threeObj.material = new THREE.MeshBasicMaterial({ color: myColor, side: THREE.DoubleSide })
-            // console.log(this.selectedObjects)
             if ((!this.isHighlighted(obj) && this.hasHighlights()) || (this.selectedObjects.length > 0 && this.selectedObjects.findIndex(x => x.userData && x.userData._id === obj._id) === -1)) {
               threeObj.material.transparent = true;
               threeObj.material.opacity = 0.1;
@@ -409,18 +396,14 @@ export default class SpeckleRenderer {
         }
       } catch (e) {
         console.warn(`Something went wrong in the conversion of ${obj._id} (${obj.type})`)
-        // console.log(obj)
-        // console.log(e)
         return
       }
 
       if (this.objs.filter(this.isHighlighted).length > 0) {
-        // console.log("Zooming to highlights")
         this.zoomHighlightExtents();
       }
 
       else if (zoomExtents && (index === objs.length - 1)) {
-        // console.log("Zooming to filtered")
         this.computeSceneBoundingSphere()
         this.resetCamera(true)
         if(this.selectedObjects.length > 0) this.zoomHighlightExtents()
@@ -584,7 +567,6 @@ export default class SpeckleRenderer {
     new TWEEN.Tween(self.controls.target).to({ x: where.target[0], y: where.target[1], z: where.target[2] }, duration).onUpdate(() => {
       self.controls.update();
       // if (this.x === where.target[0])
-      // console.log('camera finished stuff')
     }).easing(TWEEN.Easing.Quadratic.InOut).start()
   }
 
@@ -639,8 +621,6 @@ export default class SpeckleRenderer {
   setMaterialOverrides(obj) {
     obj.material.opacity = this.viewerSettings.meshOverrides.opacity / 100
     let specColor = new THREE.Color()
-    specColor.setHSL(0, 0, this.viewerSettings.meshOverrides.specular / 100)
-    obj.material.specular = specColor
     obj.material.needsUpdate = true
   }
 }
