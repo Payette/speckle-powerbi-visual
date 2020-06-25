@@ -123,9 +123,9 @@ export default class SpeckleRenderer {
     }
 
     this.camera.up.set(0, 0, -1)
-    this.camera.position.z = 250
-    this.camera.position.y = 250
-    this.camera.position.x = 250
+    this.camera.position.z = 20
+    this.camera.position.y = 20
+    this.camera.position.x = 20
 
     if (zoomExtents) {
       this.computeSceneBoundingSphere()
@@ -135,7 +135,7 @@ export default class SpeckleRenderer {
 
   updateCamera(camera) {
     this.viewerSettings.camera = camera
-    this.resetCamera()
+    this.resetCamera(false)
   }
 
   animate() {
@@ -186,19 +186,14 @@ export default class SpeckleRenderer {
     // check if it's a single short click (as opposed to a longer difference caused by moving the orbit controls
     // or dragging the selection box)
     if (Date.now() - this.mouseDownTime < 300) {
-      // if(this.hoveredObject.userData.selected) {
-      //   console.log("Should be removing")
-      //   if(this.selectedObjects.length === 1) this.clearSelection();
-      //   else this.removeFromSelection([this.hoveredObject]);
-      // }
       if (this.hoveredObject && this.selectedObjects.findIndex(x => x.userData._id === this.hoveredObject.userData._id) !== -1) {
         // Inside the selection -> check if it's a single object deselect
         console.log("Should remove")
         if(this.selectedObjects.length === 1) this.clearSelection();
         else this.removeFromSelection([this.hoveredObject]);
         this.updateObjectMaterials()
-      } else if (this.hoveredObject) { // if there is a hovered object...
-        //If the hoveredObject is already selected, then unselect it
+
+      } else if (this.hoveredObject) {  //If the hoveredObject is already selected, then unselect it
 
         if (event.shiftKey) {
           console.log('should add to selection')
@@ -304,7 +299,7 @@ export default class SpeckleRenderer {
     })
     this.updateObjectMaterials()
 
-    // this.resetCamera(false);
+    this.resetCamera(false);
   }
 
   clearSelection() {
@@ -350,7 +345,7 @@ export default class SpeckleRenderer {
           }
           Converter[convertType]({ obj: obj }, (err, threeObj) => {
             if (myColor) threeObj.material = new THREE.MeshBasicMaterial({ color: myColor, side: THREE.DoubleSide })
-            console.log(this.selectedObjects)
+            // console.log(this.selectedObjects)
             if ((!this.isHighlighted(obj) && this.hasHighlights()) || (this.selectedObjects.length > 0 && this.selectedObjectsfindIndex(x => x.userData._id === obj.userData._id) === -1)){
               threeObj.material.transparent = true;
               threeObj.material.opacity = 0.1; 
@@ -382,7 +377,8 @@ export default class SpeckleRenderer {
       else if (zoomExtents && (index === objs.length - 1)) {
         console.log("Zooming to filtered")
         this.computeSceneBoundingSphere()
-        this.zoomExtents()
+        this.resetCamera(true)
+        // this.zoomExtents()
       }
       
     })
@@ -429,7 +425,7 @@ export default class SpeckleRenderer {
     let vector = new THREE.Vector3(0, 0, 1)
     let dir = vector.applyQuaternion(this.controls.object.quaternion);
     let newPos = new THREE.Vector3()
-    dir.multiplyScalar(offset * 1.5)
+    dir.multiplyScalar(offset)
     newPos.addVectors(bsphere.center, dir)
     this.setCamera({
       position: [newPos.x, newPos.y, newPos.z],
@@ -444,7 +440,7 @@ export default class SpeckleRenderer {
     let vector = new THREE.Vector3(0, 0, 1)
     let dir = vector.applyQuaternion(this.controls.object.quaternion);
     let newPos = new THREE.Vector3()
-    dir.multiplyScalar(offset * 1.25)
+    dir.multiplyScalar(offset)
     newPos.addVectors(this.sceneBoundingSphere.center, dir)
     this.setCamera({
       position: [newPos.x, newPos.y, newPos.z],
@@ -459,8 +455,9 @@ export default class SpeckleRenderer {
     let vector = new THREE.Vector3(0, 0, 1)
     let dir = vector.applyQuaternion(this.controls.object.quaternion);
     let newPos = new THREE.Vector3()
-    dir.multiplyScalar(offset * 1.4)
+    dir.multiplyScalar(offset)
     newPos.addVectors(this.sceneHighlightBoundingSphere.center, dir)
+    // newPos.x -= 10000;
     this.setCamera({
       position: [newPos.x, newPos.y, newPos.z],
       rotation: [this.camera.rotation.x, this.camera.rotation.y, this.camera.rotation.z],
@@ -496,7 +493,7 @@ export default class SpeckleRenderer {
       }
 
       let otherDist = obj.geometry.boundingSphere.radius + center.distanceTo(obj.geometry.boundingSphere.center)
-      if (radius < otherDist) radius = otherDist
+      if (radius < otherDist) radius = otherDist 
 
       center.x += obj.geometry.boundingSphere.center.x
       center.y += obj.geometry.boundingSphere.center.y
@@ -507,8 +504,7 @@ export default class SpeckleRenderer {
     }
 
     if (!center) center = new THREE.Vector3(0, 0, 0)
-
-    return { center: center ? center : new THREE.Vector3(), radius: radius > 1 ? radius * 1.1 : 100 }
+    return { center: center ? center : new THREE.Vector3(), radius: radius > 1 ? radius * 1.2 : 100 }
   }
 
   RGBToHex(color) {
