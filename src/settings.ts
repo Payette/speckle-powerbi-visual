@@ -12,7 +12,7 @@ import powerbi from 'powerbi-visuals-api';
 import ISelectionManager = powerbi.extensibility.ISelectionManager;
 import IColorPalette = powerbi.extensibility.IColorPalette;
 
-export class CircleSettings {
+export class SpeckleSettings {
     public defaultRoomColor: string = "000000";
     public defaultOpacity: number = 0.75;
     public lineWeight: number = 1;
@@ -30,7 +30,7 @@ export class CircleSettings {
 }
 
 export class VisualSettings extends DataViewObjectsParser {
-    public speckle: CircleSettings = new CircleSettings();
+    public speckle: SpeckleSettings = new SpeckleSettings();
     public meshOverrides: any;
     public edgesThreshold: number;
     public defaultRoomColor: string;

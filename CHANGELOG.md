@@ -1,2 +1,2 @@
 # 1.0.0
-* React CircleCard initial version
+Custom Speckle Visual for PowerBI

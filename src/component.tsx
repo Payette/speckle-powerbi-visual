@@ -43,9 +43,7 @@ export class SpeckleVisual extends React.Component<{}, State>{
     private static updateCallback: (data: object) => void = null;
 
     public static update(newState: State) {
-        if (typeof SpeckleVisual.updateCallback === 'function') {
-            SpeckleVisual.updateCallback(newState);
-        }
+        if (typeof SpeckleVisual.updateCallback === 'function') SpeckleVisual.updateCallback(newState);
     }
 
     public state: State = initialState;
@@ -130,7 +128,7 @@ export class SpeckleVisual extends React.Component<{}, State>{
     render() {
         const { width, height } = this.state;
         const style: React.CSSProperties = { width: width, height: height };
-        return <div className="circleCard" style={style} ref={ref => (this.mount = ref)}/>
+        return <div className="speckleVisual" style={style} ref={ref => (this.mount = ref)}/>
     }
 }
 
