@@ -20,10 +20,12 @@ export class SpeckleSettings {
     public camera: string = "perspective";
     public specklestreamurl: string = "";
     public getColor: (uniqueFICMs:any, obj: any) => any = undefined;
+    public getUniqueProps?: (objs:any) => any;
     public getSelectionID: (obj: any) => any = undefined;
     public selectionManager: ISelectionManager = undefined;
     public colorPalette: IColorPalette = undefined;
     public hasHighlights?: any;
+    public sortObjs?: any;
     public exportpdf: string = "WebGL";
 }
 
@@ -54,12 +56,14 @@ export const ViewerSettings = {
     getColor: undefined,
     getSelectionID: undefined,
     selectionManager: undefined,
+    getUniqueProps: undefined,
     defaultRoomColor: "000000",
     lineColor: "000000",
     defaultOpacity: 0.6,
     isHighlighted: undefined,
     colorPalette: undefined,
     hasHighlights: undefined,
+    sortObjs: undefined,
     exportpdf: "WebGL",
     lineWeight: 1,
 }
