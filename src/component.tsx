@@ -5,7 +5,7 @@
  *  MIT License
  */
 import * as React from "react";
-import SpeckleRenderer from './SpeckleRenderer.js'
+import SpeckleRenderer from './SpeckleRenderer'
 import { ViewerSettings } from "./settings";
 import powerbi from 'powerbi-visuals-api';
 import ISelectionManager = powerbi.extensibility.ISelectionManager;
@@ -19,13 +19,11 @@ export interface State {
     camera?: string,
     getColor?: (obj: any) => any,
     getSelectionID?: (index: any) => any,
-    getUniqueProps?: (objs:any) => any,
     selectionManager?: ISelectionManager,
     isHighlighted?: (obj: any, property: string) => Boolean
     highlighted?: any,
     colorPalette?: IColorPalette,
     hasHighlights?: any,
-    sortObjs?: any,
     exportpdf?: string,
     lineColor?: string,
     cameraState?: any,
@@ -66,13 +64,11 @@ export class SpeckleVisual extends React.Component<{}, State>{
     componentDidMount() {
         ViewerSettings.camera = this.state.camera
         ViewerSettings.getColor = this.state.getColor;
-        ViewerSettings.getUniqueProps = this.state.getUniqueProps;
         ViewerSettings.getSelectionID = this.state.getSelectionID;
         ViewerSettings.selectionManager = this.state.selectionManager;
         ViewerSettings.isHighlighted = this.state.isHighlighted;
         ViewerSettings.colorPalette = this.state.colorPalette;
         ViewerSettings.hasHighlights = this.state.hasHighlights;
-        ViewerSettings.sortObjs = this.state.sortObjs;
         ViewerSettings.exportpdf = this.state.exportpdf;
         ViewerSettings.defaultRoomColor = this.state.defaultRoomColor;
         ViewerSettings.lineWeight = this.state.lineWeight;
@@ -93,11 +89,9 @@ export class SpeckleVisual extends React.Component<{}, State>{
             this.renderer.updateCamera(this.state.camera)
         }
         ViewerSettings.getColor = this.state.getColor;
-        ViewerSettings.getUniqueProps = this.state.getUniqueProps;
         ViewerSettings.getSelectionID = this.state.getSelectionID;
         ViewerSettings.selectionManager = this.state.selectionManager;
         ViewerSettings.defaultRoomColor = this.state.defaultRoomColor;
-        ViewerSettings.sortObjs = this.state.sortObjs;
         ViewerSettings.isHighlighted = this.state.isHighlighted;
         ViewerSettings.colorPalette = this.state.colorPalette;
         ViewerSettings.hasHighlights = this.state.hasHighlights;

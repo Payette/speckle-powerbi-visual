@@ -82,26 +82,13 @@ export class Visual implements IVisual {
                 return measureValue === measureHighlight
             });
 
-            let roomColorMap = {};
-            colorCategories.forEach((item, index) => roomColorMap[item] = filterCategories[index]);
-
-            let sortObjs = objs => {
-                var sorted = objs.sort((a,b)=>{
-                    if(_.get(a.properties,filterCategoryAttributeName) < _.get(b.properties, filterCategoryAttributeName)) return -1;
-                    if(_.get(a.properties, filterCategoryAttributeName) > _.get(b.properties, filterCategoryAttributeName)) return 1;
-                    return 0;
-                });
-                return sorted;
-            }
             let isHighlighted = (obj) => {
                 let objectProp = _.get(obj.properties, filterCategoryAttributeName);
                 let idx = valuesToHighlight.indexOf(objectProp);
                 return idx >= 0;
             }
 
-            let hasHighlights = () => {
-                return valuesToHighlight.length > 0;
-            }
+            let hasHighlights = () =>  valuesToHighlight.length > 0;
             let getColor = obj => {
                 let id = _.get(obj.properties, filterCategoryAttributeName)
                 if (id) {
@@ -112,10 +99,6 @@ export class Visual implements IVisual {
                 return defaultRoomColor.replace("#","");
             }
             
-            let getUniqueProps = objs =>{
-                let bigList = objs.map(obj=> _.get(obj.properties, colorCategoryAttributeName));
-                return [...new Set(bigList)]
-            }
 
             let getSelectionID = obj =>{
                 let propValue = _.get(obj.properties,filterCategoryAttributeName)
@@ -146,10 +129,8 @@ export class Visual implements IVisual {
                     getSelectionID: getSelectionID,
                     selectionManager: this.selectionManager,
                     colorPalette: this.colorPalette,
-                    getUniqueProps: getUniqueProps,
                     isHighlighted: isHighlighted,
                     hasHighlights: hasHighlights,
-                    sortObjs: sortObjs,
                     exportpdf: exportpdf,
                     lineColor: lineColor,
                 });
