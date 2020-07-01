@@ -104,14 +104,14 @@
                         {
                             "for": {
                                 "in": "roomattr"
-                            },
-                            "dataReductionAlgorithm": {
-                                "top": {
-                                    "count": 30000
-                                }
-                            }  
+                            }
                         }
-                    ]
+                    ],
+                    "dataReductionAlgorithm": {
+                        "top": {
+                            "count": 30000
+                        }
+                    } 
                 }
             }
         }
