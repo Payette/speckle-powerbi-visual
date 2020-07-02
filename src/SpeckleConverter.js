@@ -396,7 +396,7 @@ let Converter = {
     // let c = args.obj.color || '#ff0000'
     // let mesh = new THREE.Mesh( geometry, this.materialManager.getMeshMaterial( args.obj.color ) )
 
-    var material = new THREE.MeshBasicMaterial({ color: 0xffff00, side: THREE.DoubleSide, wireframe:true, transparent:true});
+    var material = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, wireframe:true, transparent:true});
     let mesh = new THREE.Mesh(geometry, material)
 
     // NOTE: needed to rematch with face arr colors

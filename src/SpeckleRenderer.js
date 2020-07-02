@@ -72,9 +72,9 @@ export default class SpeckleRenderer {
     let axesHelper = new THREE.AxesHelper(10)
     this.scene.add(axesHelper)
     // Fake Ortho
-      this.camera = new THREE.PerspectiveCamera(1, this.domObject.offsetWidth / this.domObject.offsetHeight, 0.1, 100000);
-      this.resetCamera(false)
-      this.camera.isCurrent = true
+    this.camera = new THREE.PerspectiveCamera(1, this.domObject.offsetWidth / this.domObject.offsetHeight, 0.1, 100000);
+    this.resetCamera(false)
+    this.camera.isCurrent = true
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
     this.controls.enabled = true
@@ -160,10 +160,10 @@ export default class SpeckleRenderer {
       this.camera.far = 100000
     }
 
-    this.camera.up.set(0, 0, -1)
+    this.camera.up.set(0, 0, 1)
     this.camera.position.z = 20
-    this.camera.position.y = 20
-    this.camera.position.x = 20
+    this.camera.position.y = -20
+    this.camera.position.x = -20
     if (this.controls) this.controls.target = new THREE.Vector3(0, 0, 0);
     if (zoomExtents) {
       this.computeSceneBoundingSphere()
@@ -558,6 +558,8 @@ export default class SpeckleRenderer {
     this.camera.far = 3 * this.sceneBoundingSphere.radius + camDistance * 3 // 3 is lucky
     this.camera.updateProjectionMatrix()
   }
+
+  
 
   setCamera(where, time) {
     let self = this
