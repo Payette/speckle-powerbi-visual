@@ -29,6 +29,7 @@ export interface State {
     exportpdf?: string,
     lineColor?: string,
     cameraState?: any,
+    tooltipServiceWrapper?: any
 }
 
 export const initialState: State = {
@@ -77,6 +78,7 @@ export class SpeckleVisual extends React.Component<{}, State>{
         ViewerSettings.defaultRoomColor = this.state.defaultRoomColor;
         ViewerSettings.lineWeight = this.state.lineWeight;
         ViewerSettings.lineColor = this.state.lineColor;
+        ViewerSettings.tooltipServiceWrapper = this.state.tooltipServiceWrapper;
         this.renderer = new SpeckleRenderer({ domObject: this.mount }, ViewerSettings)
         this.renderer.animate()
         this.grabSpeckleObjectsFromURLAndUpdate(this.state.speckleStreamURL)
@@ -105,6 +107,7 @@ export class SpeckleVisual extends React.Component<{}, State>{
         ViewerSettings.lineWeight = this.state.lineWeight;
         ViewerSettings.defaultRoomColor = this.state.defaultRoomColor;
         ViewerSettings.lineColor = this.state.lineColor;
+        ViewerSettings.tooltipServiceWrapper = this.state.tooltipServiceWrapper;
 
         this.renderer.updateViewerSettings(ViewerSettings)
         this.renderer.reloadObjects()

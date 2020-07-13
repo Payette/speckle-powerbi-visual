@@ -42,7 +42,8 @@ export default class SpeckleRenderer {
     this.selectionBox = null
     this.selectionHelper = null
 
-    this.hoveredObject = null
+    this.hoveredObject = null;
+    this.hoveredPoint = null;
     this.selectedObjects = []
     this.highlightedObjects = []
 
@@ -59,6 +60,7 @@ export default class SpeckleRenderer {
 
     this.svgrenderer = new SVGRenderer();
     this.svgrenderer.setSize(this.domObject.offsetWidth, this.domObject.offsetHeight)
+    this.tooltipServiceWrapper = this.viewerSettings.tooltipServiceWrapper
 
     this.domObject.appendChild(this.webglrenderer.domElement);
     this.renderer = this.webglrenderer;
@@ -99,6 +101,7 @@ export default class SpeckleRenderer {
     this.switchRenderer(this.viewerSettings.exportpdf)
     // this.resetCamera(true)
 
+    this.tooltipServiceWrapper = this.viewerSettings.tooltipServiceWrapper
     this.raycaster = new THREE.Raycaster()
     this.mouse = new THREE.Vector2()
 
@@ -294,9 +297,12 @@ export default class SpeckleRenderer {
             this.hoveredObject.userData.hovered = false
           }
           this.hoveredObject = intersects[0].object
+          this.hoveredPoint = intersects[0].point
           this.hoveredObject.userData.hovered = true
           this.hoveredObject.material.__preHoverColor = this.hoveredObject.material.color.clone()
           this.hoveredObject.material.color.copy(this.hoverColor)
+          console.log(this.tooltipServiceWrapper)
+          this.tooltipServiceWrapper.showTooltip(this.hoveredObject, this.hoveredPoint, this.camera, this.renderer, [], () => {}, tooltipEvent => tooltipEvent)
         }
       }
     } else {
@@ -589,6 +595,7 @@ export default class SpeckleRenderer {
     this.selectionManager = viewerSettings.selectionManager;
     if (this.lineWeight && viewerSettings.lineWeight !== this.lineWeight) this.svgrenderer.lineWeight = viewerSettings.lineWeight;
     if (this.lineColor && viewerSettings.lineColor !== this.lineColor) this.svgrenderer.lineColor = viewerSettings.lineColor;
+    this.tooltipServiceWrapper = viewerSettings.tooltipServiceWrapper
 
     this.lineWeight = viewerSettings.lineWeight;
     this.lineColor = viewerSettings.lineColor;

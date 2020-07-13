@@ -23,7 +23,7 @@ import VisualObjectInstance = powerbi.VisualObjectInstance;
 import EnumerateVisualObjectInstancesOptions = powerbi.EnumerateVisualObjectInstancesOptions;
 import VisualObjectInstanceEnumerationObject = powerbi.VisualObjectInstanceEnumerationObject;
 import IVisualEventService = powerbi.extensibility.IVisualEventService;
-import DataViewCategorical = powerbi.DataViewCategorical;
+import { createTooltipServiceWrapper, TooltipEventArgs, ITooltipServiceWrapper } from "./tooltipServiceWrapper";
 import DataViewCategoryColumn = powerbi.DataViewCategoryColumn;
 import PrimitiveValue = powerbi.PrimitiveValue;
 import DataViewValueColumn = powerbi.DataViewValueColumn;
@@ -42,6 +42,8 @@ export class Visual implements IVisual {
     private selectionManager: ISelectionManager;
     private events: IVisualEventService;
     private colorPalette: IColorPalette;
+    private tooltipServiceWrapper: ITooltipServiceWrapper;
+    
 
     constructor(options: VisualConstructorOptions) {
         this.reactRoot = React.createElement(SpeckleVisual, {});
@@ -55,6 +57,9 @@ export class Visual implements IVisual {
 
     public update(options: VisualUpdateOptions) {
         this.events.renderingStarted(options);
+        // this.colorPalette = options.host.colorPalette;
+        this.colorPalette = this.host.colorPalette;
+
         if (options.dataViews && options.dataViews.length > 0) {
             const dataView: DataView = options.dataViews[0];
             this.viewport = options.viewport;
@@ -73,6 +78,7 @@ export class Visual implements IVisual {
             let colorCategories = _.get(dataView, "categorical.values[0].values")
             let filterCategoryAttributeName = _.get(dataView, "metadata.columns["+categoryIndex+"].displayName")
             let colorCategoryAttributeName = _.get(dataView, "metadata.columns["+measureIndex+"].displayName")
+
             const measures: DataViewValueColumn = dataView.categorical.values[0];
             const measureValues = measures.values;
             const measureHighlights = measures.highlights;
@@ -102,20 +108,35 @@ export class Visual implements IVisual {
             let hasHighlights = () => {
                 return valuesToHighlight.length > 0;
             }
+
+            let getUniqueProps = objs =>{
+                let bigList = objs.map(obj=> _.get(obj.properties, colorCategoryAttributeName));
+                return [...new Set(bigList)]
+            }
+
+            let colorMap = {};
+            let colorList = [... new Set(colorCategories)];
+            colorList.sort();
+            colorList.forEach((item, index) => colorMap[index] = this.colorPalette.getColor(JSON.stringify(item)));
+            // console.log(colorMap);
+
             let getColor = obj => {
                 let id = _.get(obj.properties, filterCategoryAttributeName)
                 if (id) {
                     let idx = filterCategories.indexOf(id);
-                    if (idx !== -1) return this.colorPalette.getColor(colorCategories[idx]).value.replace("#","");
+                    if (idx !== -1){
+                        let colorValue = colorList.indexOf(colorCategories[idx])
+                        // console.log(colorMap[colorValue].value)
+                        return colorMap[colorValue].value.replace("#","");
+                    }
+                    
                     else return defaultRoomColor.replace("#","");
                 }
                 return defaultRoomColor.replace("#","");
             }
             
-            let getUniqueProps = objs =>{
-                let bigList = objs.map(obj=> _.get(obj.properties, colorCategoryAttributeName));
-                return [...new Set(bigList)]
-            }
+            this.tooltipServiceWrapper = createTooltipServiceWrapper(this.host.tooltipService, this.target, 0, filterCategories, filterCategoryAttributeName, colorCategories, colorCategoryAttributeName, getColor);
+
 
             let getSelectionID = obj =>{
                 let propValue = _.get(obj.properties,filterCategoryAttributeName)
@@ -152,6 +173,7 @@ export class Visual implements IVisual {
                     sortObjs: sortObjs,
                     exportpdf: exportpdf,
                     lineColor: lineColor,
+                    tooltipServiceWrapper: this.tooltipServiceWrapper
                 });
             }
         } else {

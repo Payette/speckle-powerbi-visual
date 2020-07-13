@@ -23,6 +23,7 @@
     "lodash.debounce": "^4.0.8",
     "powerbi-visuals-api": "2.5.0",
     "powerbi-visuals-utils-dataviewutils": "2.0.1",
+    "powerbi-visuals-utils-tooltiputils": "^2.4.0",
     "rainbowvis.js": "^1.0.1",
     "react": "16.8.6",
     "react-dom": "16.8.6",
