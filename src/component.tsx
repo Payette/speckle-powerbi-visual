@@ -64,6 +64,10 @@ export class SpeckleVisual extends React.Component<{}, State>{
         SpeckleVisual.updateCallback = null;
     }
 
+    // public resetCamera(){
+    //     this.renderer.resetCamera();
+    // }
+
     componentDidMount() {
         ViewerSettings.camera = this.state.camera
         ViewerSettings.getColor = this.state.getColor;
@@ -110,6 +114,7 @@ export class SpeckleVisual extends React.Component<{}, State>{
         ViewerSettings.tooltipServiceWrapper = this.state.tooltipServiceWrapper;
 
         this.renderer.updateViewerSettings(ViewerSettings)
+        // this.renderer.resetCamera(true);
         this.renderer.reloadObjects()
     }
 
@@ -121,6 +126,7 @@ export class SpeckleVisual extends React.Component<{}, State>{
                     let objs = data.resources;
                     this.renderer.unloadAllObjects()
                     this.renderer.loadObjects({ objs: objs, zoomExtents: true, firstLoad: true })
+                    this.renderer.zoomExtents(true);
                 })
                 .catch(error => {
                     console.error("Unable to fetch from URL", error)
@@ -131,7 +137,9 @@ export class SpeckleVisual extends React.Component<{}, State>{
     render() {
         const { width, height } = this.state;
         const style: React.CSSProperties = { width: width, height: height };
-        return <div className="speckleVisual" style={style} ref={ref => (this.mount = ref)}/>
+        return <div className="speckleVisual" style={style} ref={ref => (this.mount = ref)}> 
+            <button>Reset Camera</button>
+        </div>
     }
 }
 

@@ -411,7 +411,7 @@ export default class SpeckleRenderer {
 
       else if (zoomExtents && (index === objs.length - 1)) {
         this.computeSceneBoundingSphere()
-        this.resetCamera(true)
+        // this.resetCamera(true)
         if(this.selectedObjects.length > 0) this.zoomHighlightExtents()
         // if(this.selectedObjects.length > 0) this.zoomToObject(this.selectedObjects[0])
       }
@@ -433,7 +433,7 @@ export default class SpeckleRenderer {
       object.parent.remove(object)
       if (index === toRemove.length - 1) {
         this.computeSceneBoundingSphere()
-        this.zoomExtents()
+        // this.zoomExtents()
       }
     })
   }

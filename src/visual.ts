@@ -188,6 +188,10 @@ export class Visual implements IVisual {
         SpeckleVisual.update(initialState);
     }
 
+    public resetCamera() {
+        // SpeckleVisual.resetCamera(true);
+    }
+
     public enumerateObjectInstances(
         options: EnumerateVisualObjectInstancesOptions
     ): VisualObjectInstance[] | VisualObjectInstanceEnumerationObject {
