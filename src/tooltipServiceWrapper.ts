@@ -88,10 +88,9 @@ class TooltipServiceWrapper implements ITooltipServiceWrapper {
                 tooltipPosition.y = -(tooltipPosition.y * canvasHalfHeight) + canvasHalfHeight + renderer.domElement.offsetTop;
                 let tt = [tooltipPosition.x, tooltipPosition.y]
 
-                let category = selectedObject.userData.properties[this.filterCategoryName];
+                let category = selectedObject.userData.properties.parameters.Comments;
                 let categoryIndex = this.filterCategory.indexOf(category);
                 let attribute = this.colorCategory[categoryIndex];
-                console.log(this.getColor({...selectedObject, properties:selectedObject.userData.properties}))
                 
                 this.visualHostTooltipService.show({
                     coordinates: tt,

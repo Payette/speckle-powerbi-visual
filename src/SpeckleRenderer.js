@@ -301,7 +301,7 @@ export default class SpeckleRenderer {
           this.hoveredObject.userData.hovered = true
           this.hoveredObject.material.__preHoverColor = this.hoveredObject.material.color.clone()
           this.hoveredObject.material.color.copy(this.hoverColor)
-          console.log(this.tooltipServiceWrapper)
+          // console.log(this.hoveredObject)
           this.tooltipServiceWrapper.showTooltip(this.hoveredObject, this.hoveredPoint, this.camera, this.renderer, [], () => {}, tooltipEvent => tooltipEvent)
         }
       }
@@ -355,7 +355,7 @@ export default class SpeckleRenderer {
   reloadObjects() {
     if (this.objs) {
       this.unloadAllObjects()
-      this.loadObjects({ objs: this.objs, zoomExtents: true })
+      this.loadObjects({ objs: this.objs, zoomExtents: false })
     }
   }
 
@@ -391,7 +391,7 @@ export default class SpeckleRenderer {
             else if (this.isHighlighted(obj)) threeObj.material.transparent = false;
             threeObj.userData._id = obj._id
             threeObj.userData.selectionID = this.getSelectionID(obj);
-            threeObj.userData.properties = obj.properties ? flatten(obj.properties, { safe: true }) : null
+            threeObj.userData.properties = obj.properties //? flatten(obj.properties, { safe: true }) : null
             threeObj.userData.originalColor = threeObj.material.color.clone()
             threeObj.geometry.computeBoundingSphere()
             threeObj.castShadow = true

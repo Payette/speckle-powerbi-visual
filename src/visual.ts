@@ -79,6 +79,7 @@ export class Visual implements IVisual {
             let filterCategoryAttributeName = _.get(dataView, "metadata.columns["+categoryIndex+"].displayName")
             let colorCategoryAttributeName = _.get(dataView, "metadata.columns["+measureIndex+"].displayName")
 
+            // console.log(filterCategories)
             const measures: DataViewValueColumn = dataView.categorical.values[0];
             const measureValues = measures.values;
             const measureHighlights = measures.highlights;
@@ -93,14 +94,14 @@ export class Visual implements IVisual {
 
             let sortObjs = objs => {
                 var sorted = objs.sort((a,b)=>{
-                    if(_.get(a.properties,filterCategoryAttributeName) < _.get(b.properties, filterCategoryAttributeName)) return -1;
-                    if(_.get(a.properties, filterCategoryAttributeName) > _.get(b.properties, filterCategoryAttributeName)) return 1;
+                    if(_.get(a.properties.parameters, 'Comments') < _.get(b.properties.parameters, 'Comments')) return -1;
+                    if(_.get(a.properties.parameters, 'Comments') > _.get(b.properties.parameters, 'Comments')) return 1;
                     return 0;
                 });
                 return sorted;
             }
             let isHighlighted = (obj) => {
-                let objectProp = _.get(obj.properties, filterCategoryAttributeName);
+                let objectProp = _.get(obj.properties.parameters, 'Comments');
                 let idx = valuesToHighlight.indexOf(objectProp);
                 return idx >= 0;
             }
@@ -121,7 +122,7 @@ export class Visual implements IVisual {
             // console.log(colorMap);
 
             let getColor = obj => {
-                let id = _.get(obj.properties, filterCategoryAttributeName)
+                let id = _.get(obj.properties.parameters, 'Comments')
                 if (id) {
                     let idx = filterCategories.indexOf(id);
                     if (idx !== -1){
@@ -139,8 +140,9 @@ export class Visual implements IVisual {
 
 
             let getSelectionID = obj =>{
-                let propValue = _.get(obj.properties,filterCategoryAttributeName)
+                let propValue = _.get(obj.properties.parameters, 'Comments')
                 let trueIndex = filterCategories.indexOf(propValue); 
+                // console.log(trueIndex)
                 return this.host.createSelectionIdBuilder().withCategory(dataView.categorical.categories[0],trueIndex).createSelectionId();
             }
 
