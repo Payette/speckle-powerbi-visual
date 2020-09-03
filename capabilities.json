@@ -31,6 +31,22 @@
                         ]
                     }
                 },
+                "exportsource": {
+                    "displayName": "Export Source",
+                    "description": "The program the speckle model is exported from. Determines how the visual gets its Room property",
+                    "type": {
+                        "enumeration": [
+                            {
+                                "displayName": "Rhino",
+                                "value": "Rhino"
+                            },
+                            {
+                                "displayName": "Revit",
+                                "value": "Revit"
+                            }
+                        ]
+                    }
+                },
                 "specklestreamurl": {
                     "displayName": "Speckle Stream URL",
                     "description": "URL of a Speckle object stream, should be like https://speckleserver/api/streams/STREAM_FINGERPRINT/objects",

@@ -27,7 +27,10 @@ export class SpeckleSettings {
     public hasHighlights?: any;
     public sortObjs?: any;
     public exportpdf: string = "WebGL";
-    public tooltipServiceWrapper: any
+    public exportsource: string = "Rhino";
+    public tooltipServiceWrapper: any;
+    public events: any;
+    public options: any;
 }
 
 export class VisualSettings extends DataViewObjectsParser {
@@ -66,6 +69,9 @@ export const ViewerSettings = {
     hasHighlights: undefined,
     sortObjs: undefined,
     exportpdf: "WebGL",
+    exportsource: "Rhino",
     lineWeight: 1,
-    tooltipServiceWrapper: undefined
+    tooltipServiceWrapper: undefined,
+    events: undefined,
+    options: undefined
 }

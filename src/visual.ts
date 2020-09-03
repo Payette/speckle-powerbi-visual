@@ -71,6 +71,7 @@ export class Visual implements IVisual {
             let defaultRoomColor = _.get(object, "defaultRoomColor");
             let lineColor = _.get(object, 'lineColor');
             let exportpdf = _.get(object, 'exportpdf');
+            let exportSource = _.get(object, 'exportsource');
 
             let measureIndex = dataView.metadata.columns.findIndex(c=>c.isMeasure);
             let categoryIndex = dataView.metadata.columns.findIndex(c=>!c.isMeasure);
@@ -78,6 +79,13 @@ export class Visual implements IVisual {
             let colorCategories = _.get(dataView, "categorical.values[0].values")
             let filterCategoryAttributeName = _.get(dataView, "metadata.columns["+categoryIndex+"].displayName")
             let colorCategoryAttributeName = _.get(dataView, "metadata.columns["+measureIndex+"].displayName")
+
+
+            function getRoomProperty(obj){
+                if(exportSource === 'Rhino') return _.get(obj, 'properties.Room');
+                else if (exportSource === 'Revit') return _.get(obj, 'properties.parameters.Comments');
+                else return null;
+            }
 
             // console.log(filterCategories)
             const measures: DataViewValueColumn = dataView.categorical.values[0];
@@ -94,14 +102,14 @@ export class Visual implements IVisual {
 
             let sortObjs = objs => {
                 var sorted = objs.sort((a,b)=>{
-                    if(_.get(a.properties.parameters, 'Comments') < _.get(b.properties.parameters, 'Comments')) return -1;
-                    if(_.get(a.properties.parameters, 'Comments') > _.get(b.properties.parameters, 'Comments')) return 1;
+                    if(getRoomProperty(a) < getRoomProperty(b)) return -1;
+                    if(getRoomProperty(a) > getRoomProperty(b)) return 1;
                     return 0;
                 });
                 return sorted;
             }
             let isHighlighted = (obj) => {
-                let objectProp = _.get(obj.properties.parameters, 'Comments');
+                let objectProp = getRoomProperty(obj)
                 let idx = valuesToHighlight.indexOf(objectProp);
                 return idx >= 0;
             }
@@ -122,7 +130,7 @@ export class Visual implements IVisual {
             // console.log(colorMap);
 
             let getColor = obj => {
-                let id = _.get(obj.properties.parameters, 'Comments')
+                let id = getRoomProperty(obj)
                 if (id) {
                     let idx = filterCategories.indexOf(id);
                     if (idx !== -1){
@@ -136,11 +144,11 @@ export class Visual implements IVisual {
                 return defaultRoomColor.replace("#","");
             }
             
-            this.tooltipServiceWrapper = createTooltipServiceWrapper(this.host.tooltipService, this.target, 0, filterCategories, filterCategoryAttributeName, colorCategories, colorCategoryAttributeName, getColor);
+            this.tooltipServiceWrapper = createTooltipServiceWrapper(this.host.tooltipService, this.target, 0, filterCategories, filterCategoryAttributeName, colorCategories, colorCategoryAttributeName, getColor, getRoomProperty);
 
 
             let getSelectionID = obj =>{
-                let propValue = _.get(obj.properties.parameters, 'Comments')
+                let propValue = getRoomProperty(obj)
                 let trueIndex = filterCategories.indexOf(propValue); 
                 // console.log(trueIndex)
                 return this.host.createSelectionIdBuilder().withCategory(dataView.categorical.categories[0],trueIndex).createSelectionId();
@@ -175,13 +183,22 @@ export class Visual implements IVisual {
                     sortObjs: sortObjs,
                     exportpdf: exportpdf,
                     lineColor: lineColor,
-                    tooltipServiceWrapper: this.tooltipServiceWrapper
+                    tooltipServiceWrapper: this.tooltipServiceWrapper,
+                    events: this.events,
+                    options: options
                 });
             }
         } else {
             this.clear();
         }
-        this.events.renderingFinished(options);
+        // if(_.get(this.settings.speckle, 'exportpdf') === 'SVG'){
+        //     setTimeout(() => {
+        //         this.events.renderingFinished(options);
+        //     }, 20000)
+        // }
+        // else setTimeout(() => {
+        //     this.events.renderingFinished(options);
+        // }, 10000)
     }
 
     private clear() {

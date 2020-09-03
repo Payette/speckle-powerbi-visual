@@ -5,8 +5,9 @@
 import { Box2, Camera, Matrix4 } from "three";
 import { Projector } from "./Projector.js";
 import { RenderableFace } from "./Projector.js";
-import * as turf from '@turf/turf'
 import * as _ from 'lodash';
+import * as PolygonClipping from 'polygon-clipping';
+import PolyBool from 'polybooljs';
 
 var SVGRenderer = function () {
 
@@ -62,23 +63,50 @@ var SVGRenderer = function () {
 
 	function groupByColor(elements) {
 		var grouped = _.groupBy(elements, 'material.uuid');
+		// console.log(Object.keys(grouped), grouped)
 		grouped = Object.keys(grouped).map(group => {
+			// console.log("Mapping by group", group)
 			var polygons = [];
 			for (var face of grouped[group]) {
-				var p = turf.polygon([[
-					[face.v1.positionScreen.x * _svgWidthHalf, face.v1.positionScreen.y * - _svgHeightHalf],
-					[face.v2.positionScreen.x * _svgWidthHalf, face.v2.positionScreen.y * - _svgHeightHalf],
-					[face.v3.positionScreen.x * _svgWidthHalf, face.v3.positionScreen.y * - _svgHeightHalf],
-					[face.v1.positionScreen.x * _svgWidthHalf, face.v1.positionScreen.y * - _svgHeightHalf]
-				]]);
+				var p = {
+					coordinates: [
+						[
+							[face.v1.positionScreen.x * _svgWidthHalf, face.v1.positionScreen.y * - _svgHeightHalf],
+							[face.v2.positionScreen.x * _svgWidthHalf, face.v2.positionScreen.y * - _svgHeightHalf],
+							[face.v3.positionScreen.x * _svgWidthHalf, face.v3.positionScreen.y * - _svgHeightHalf],
+							[face.v1.positionScreen.x * _svgWidthHalf, face.v1.positionScreen.y * - _svgHeightHalf]
+						]
+					],
+					inverted: false
+				}
 				polygons.push(p);
 			}
 			if (polygons.length > 0) {
-				var unioned = turf.union(...polygons);
-				return {
-					verts: unioned.geometry.coordinates[0],
-					material: grouped[group][0].material
+				try {
+					// console.log(polygons.map(turf.area))
+					// polygons = polygons.map(e => e.geometry).map(PolyBool.polygonFromGeoJSON);
+					// var segments = PolyBool.segments(polygons[0]);
+					// for (var i = 1; i < polygons.length; i++) {
+					// 	var seg2 = PolyBool.segments(polygons[i]);
+					// 	var comb = PolyBool.combine(segments, seg2);
+					// 	segments = PolyBool.selectUnion(comb);
+					// }
+					// console.log(unioned)
+					return {
+						// @ts-ignore
+						verts: PolygonClipping.union(...polygons.map(e => e.coordinates)),
+						material: grouped[group][0].material
+					}
 				}
+				catch (e) {
+					// console.log(polygons)
+					return {
+						verts: polygons,
+						material: grouped[group][0].material
+
+					};
+				}
+
 			}
 			return null;
 		});
@@ -120,9 +148,10 @@ var SVGRenderer = function () {
 
 		_renderData = _projector.projectScene(scene, camera, this.sortObjects, this.sortElements);
 		_elements = _renderData.elements;
+		// console.log(_elements, _elements.filter(e => e instanceof RenderableFace))
 
 		var faces = _elements.filter(e => e instanceof RenderableFace);
-		var grouped = groupByColor(faces);
+		var grouped = groupByColor(faces).filter(e => !!e);
 
 		for (var face of grouped) {
 			let path = pathFromVerts(face.verts);
@@ -137,7 +166,7 @@ var SVGRenderer = function () {
 	};
 
 	function getPathNode(id) {
-		
+
 		if (_svgPathPool[id] == null) {
 			_svgPathPool[id] = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 			return _svgPathPool[id];

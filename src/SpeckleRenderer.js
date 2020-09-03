@@ -3,7 +3,7 @@ import _ from 'lodash'
 import OrbitControls from 'threejs-orbit-controls'
 import TWEEN from '@tweenjs/tween.js'
 import flatten from 'flat'
-
+import { svgExport } from './SVGExport';
 import { Converter } from './SpeckleConverter.js'
 import SelectionBox from './SelectionBox.js'
 import SelectionHelper from './SelectionHelper.js'
@@ -80,7 +80,7 @@ export default class SpeckleRenderer {
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
     this.controls.enabled = true
-    this.controls.screenSpacePanning = true
+    this.controls.screenSpacePanning = false
     this.controls.enableRotate = false
 
     this.updateViewerSettings(this.viewerSettings)
@@ -149,6 +149,7 @@ export default class SpeckleRenderer {
   }
 
   resetCamera(zoomExtents = true) {
+    console.log(this.camera)
     if (this.viewerSettings.camera === "orthographic") {
       // Fake Ortho
       this.camera.fov = 1
@@ -167,7 +168,7 @@ export default class SpeckleRenderer {
     this.camera.position.z = 20
     this.camera.position.y = -20
     this.camera.position.x = -20
-    if (this.controls) this.controls.target = new THREE.Vector3(0, 0, 0);
+    if (this.controls) this.controls.reset();
     if (zoomExtents) {
       this.computeSceneBoundingSphere()
       this.zoomExtents()
@@ -248,7 +249,7 @@ export default class SpeckleRenderer {
           this.updateObjectMaterials(true);
           let selectedID = _.get(o, 'userData.selectionID');
           //https://discourse.threejs.org/t/changing-opacity-of-a-object-group/8783/2
-
+          console.log(o);
           if(selectedID) this.selectionManager.select(selectedID)
 
         }
@@ -363,10 +364,11 @@ export default class SpeckleRenderer {
   // computes each objects's bounding sphere for faster zoom extents calculation
   // of the scene bounding sphere.
   loadObjects({ objs, zoomExtents, firstLoad }) {
-    this.objs = objs
+    this.events.renderingStarted(this.options);
     //For some reason I think we need to sort by room first 
     let sorted = this.sortObjs(objs);
     if (this.hasHighlights()) this.clearSelection();
+    console.log(sorted.length, " objects")
     sorted.forEach((obj, index) => {
       try {
         let splitType = obj.type.split("/")
@@ -404,6 +406,10 @@ export default class SpeckleRenderer {
         console.warn(`Something went wrong in the conversion of ${obj._id} (${obj.type})`)
         return
       }
+      if(!this.objs){
+        this.controls.saveState();
+      }
+      this.objs = objs
 
       if (this.objs.filter(this.isHighlighted).length > 0) {
         this.zoomHighlightExtents();
@@ -417,6 +423,11 @@ export default class SpeckleRenderer {
       }
 
     })
+    setTimeout(() => {
+      this.events.renderingFinished(this.options)
+
+    }, 10000)
+
   }
 
   // removes all objects from the scene and recalculates the scene bounding sphere
@@ -593,6 +604,8 @@ export default class SpeckleRenderer {
     this.getSelectionID = viewerSettings.getSelectionID;
     this.sortObjs = viewerSettings.sortObjs;
     this.selectionManager = viewerSettings.selectionManager;
+    this.events = viewerSettings.events;
+    this.options = viewerSettings.options
     if (this.lineWeight && viewerSettings.lineWeight !== this.lineWeight) this.svgrenderer.lineWeight = viewerSettings.lineWeight;
     if (this.lineColor && viewerSettings.lineColor !== this.lineColor) this.svgrenderer.lineColor = viewerSettings.lineColor;
     this.tooltipServiceWrapper = viewerSettings.tooltipServiceWrapper

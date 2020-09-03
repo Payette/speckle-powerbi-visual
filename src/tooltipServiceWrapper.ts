@@ -23,8 +23,8 @@ export interface ITooltipServiceWrapper {
 
 const DefaultHandleTouchDelay = 1000;
 
-export function createTooltipServiceWrapper(tooltipService: ITooltipService, rootElement: HTMLElement, handleTouchDelay: number = DefaultHandleTouchDelay, filterCategory: any, filterCategoryName: string, colorCategory: any, colorCategoryName: any, getColor: any): ITooltipServiceWrapper {
-    return new TooltipServiceWrapper(tooltipService, rootElement, handleTouchDelay, filterCategory, filterCategoryName, colorCategory, colorCategoryName, getColor);
+export function createTooltipServiceWrapper(tooltipService: ITooltipService, rootElement: HTMLElement, handleTouchDelay: number = DefaultHandleTouchDelay, filterCategory: any, filterCategoryName: string, colorCategory: any, colorCategoryName: any, getColor: any, getRoomProperty: any): ITooltipServiceWrapper {
+    return new TooltipServiceWrapper(tooltipService, rootElement, handleTouchDelay, filterCategory, filterCategoryName, colorCategory, colorCategoryName, getColor, getRoomProperty);
 }
 
 class TooltipServiceWrapper implements ITooltipServiceWrapper {
@@ -42,8 +42,9 @@ class TooltipServiceWrapper implements ITooltipServiceWrapper {
     private filterCategoryName: string;
     private colorCategoryName: string;
     private getColor: any;
+    private getRoomProperty: any;
 
-    constructor(tooltipService: ITooltipService, rootElement: HTMLElement, handleTouchDelay: number, filterCategory: any, filterCategoryName: string, colorCategory: any, colorCategoryName: any, getColor: any) {
+    constructor(tooltipService: ITooltipService, rootElement: HTMLElement, handleTouchDelay: number, filterCategory: any, filterCategoryName: string, colorCategory: any, colorCategoryName: any, getColor: any, getRoomProperty: any) {
         this.visualHostTooltipService = tooltipService;
         this.handleTouchDelay = handleTouchDelay;
         this.rootElement = rootElement;
@@ -54,6 +55,7 @@ class TooltipServiceWrapper implements ITooltipServiceWrapper {
         this.filterCategoryName = filterCategoryName;
         this.colorCategoryName = colorCategoryName;
         this.getColor = getColor;
+        this.getRoomProperty = getRoomProperty;
     }
 
     public showTooltip<T>(
@@ -88,7 +90,7 @@ class TooltipServiceWrapper implements ITooltipServiceWrapper {
                 tooltipPosition.y = -(tooltipPosition.y * canvasHalfHeight) + canvasHalfHeight + renderer.domElement.offsetTop;
                 let tt = [tooltipPosition.x, tooltipPosition.y]
 
-                let category = selectedObject.userData.properties.parameters.Comments;
+                let category = this.getRoomProperty(selectedObject.userData);
                 let categoryIndex = this.filterCategory.indexOf(category);
                 let attribute = this.colorCategory[categoryIndex];
                 

@@ -19,7 +19,7 @@ export interface State {
     camera?: string,
     getColor?: (obj: any) => any,
     getSelectionID?: (index: any) => any,
-    getUniqueProps?: (objs:any) => any,
+    getUniqueProps?: (objs: any) => any,
     selectionManager?: ISelectionManager,
     isHighlighted?: (obj: any, property: string) => Boolean
     highlighted?: any,
@@ -27,16 +27,20 @@ export interface State {
     hasHighlights?: any,
     sortObjs?: any,
     exportpdf?: string,
+    exportsource?: string,
     lineColor?: string,
     cameraState?: any,
-    tooltipServiceWrapper?: any
+    tooltipServiceWrapper?: any,
+    events?: any,
+    options?: any
 }
 
 export const initialState: State = {
     speckleStreamURL: "",
     width: 200,
     height: 200,
-    exportpdf: "WebGL"
+    exportpdf: "WebGL",
+    exportsource: 'Rhino'
 }
 
 export class SpeckleVisual extends React.Component<{}, State>{
@@ -79,10 +83,13 @@ export class SpeckleVisual extends React.Component<{}, State>{
         ViewerSettings.hasHighlights = this.state.hasHighlights;
         ViewerSettings.sortObjs = this.state.sortObjs;
         ViewerSettings.exportpdf = this.state.exportpdf;
+        ViewerSettings.exportsource = this.state.exportsource;
         ViewerSettings.defaultRoomColor = this.state.defaultRoomColor;
         ViewerSettings.lineWeight = this.state.lineWeight;
         ViewerSettings.lineColor = this.state.lineColor;
         ViewerSettings.tooltipServiceWrapper = this.state.tooltipServiceWrapper;
+        ViewerSettings.events = this.state.events;
+        ViewerSettings.options = this.state.options;
         this.renderer = new SpeckleRenderer({ domObject: this.mount }, ViewerSettings)
         this.renderer.animate()
         this.grabSpeckleObjectsFromURLAndUpdate(this.state.speckleStreamURL)
@@ -108,11 +115,13 @@ export class SpeckleVisual extends React.Component<{}, State>{
         ViewerSettings.colorPalette = this.state.colorPalette;
         ViewerSettings.hasHighlights = this.state.hasHighlights;
         ViewerSettings.exportpdf = this.state.exportpdf;
+        ViewerSettings.exportsource = this.state.exportsource;
         ViewerSettings.lineWeight = this.state.lineWeight;
         ViewerSettings.defaultRoomColor = this.state.defaultRoomColor;
         ViewerSettings.lineColor = this.state.lineColor;
         ViewerSettings.tooltipServiceWrapper = this.state.tooltipServiceWrapper;
-
+        ViewerSettings.events = this.state.events;
+        ViewerSettings.options = this.state.options;
         this.renderer.updateViewerSettings(ViewerSettings)
         // this.renderer.resetCamera(true);
         this.renderer.reloadObjects()
@@ -137,8 +146,10 @@ export class SpeckleVisual extends React.Component<{}, State>{
     render() {
         const { width, height } = this.state;
         const style: React.CSSProperties = { width: width, height: height };
-        return <div className="speckleVisual" style={style} ref={ref => (this.mount = ref)}> 
-            <button>Reset Camera</button>
+        return <div style={style}>
+            <button style={{position:'absolute', zIndex:1300}} onClick={() => this.renderer.resetCamera()}>Reset Camera</button>
+            <div style={style} className="speckleVisual" ref={ref => (this.mount = ref)}>
+            </div>
         </div>
     }
 }
