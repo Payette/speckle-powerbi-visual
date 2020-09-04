@@ -7,7 +7,6 @@ import { Projector } from "./Projector.js";
 import { RenderableFace } from "./Projector.js";
 import * as _ from 'lodash';
 import * as PolygonClipping from 'polygon-clipping';
-import PolyBool from 'polybooljs';
 
 var SVGRenderer = function () {
 
@@ -15,8 +14,6 @@ var SVGRenderer = function () {
 		_projector = new Projector(),
 		_svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'),
 		_svgWidth, _svgHeight, _svgWidthHalf, _svgHeightHalf,
-
-		_clipBox = new Box2(),
 
 		_viewMatrix = new Matrix4(),
 		_viewProjectionMatrix = new Matrix4(),
@@ -37,19 +34,19 @@ var SVGRenderer = function () {
 	this.lineColor = "#000000";
 
 	this.setSize = function (width, height) {
-
-		_svgWidth = width; _svgHeight = height;
-		_svgWidthHalf = _svgWidth / 2; _svgHeightHalf = _svgHeight / 2;
+		// Set size of viewbox
+		_svgWidth = width; 
+		_svgHeight = height;
+		_svgWidthHalf = _svgWidth / 2; 
+		_svgHeightHalf = _svgHeight / 2;
 
 		_svg.setAttribute('viewBox', (-_svgWidthHalf) + ' ' + (-_svgHeightHalf) + ' ' + _svgWidth + ' ' + _svgHeight);
 		_svg.setAttribute('width', _svgWidth);
 		_svg.setAttribute('height', _svgHeight);
 
-		_clipBox.min.set(-_svgWidthHalf, -_svgHeightHalf);
-		_clipBox.max.set(_svgWidthHalf, _svgHeightHalf);
-
 	};
 
+	// We keep precision high for this because the models have high precision but are small (not sure why but the Speckle process)
 	this.setPrecision = precision => _precision = precision;
 
 	function removeChildNodes() {
@@ -61,13 +58,14 @@ var SVGRenderer = function () {
 
 	this.clear = () => removeChildNodes();
 
+
+	// We group the elements by material, since material is essentially equivalent of object, so this lets us group particularly faces
 	function groupByColor(elements) {
 		var grouped = _.groupBy(elements, 'material.uuid');
-		// console.log(Object.keys(grouped), grouped)
 		grouped = Object.keys(grouped).map(group => {
-			// console.log("Mapping by group", group)
 			var polygons = [];
 			for (var face of grouped[group]) {
+				// Convert Three.js mesh into closed polygon: v1 -> v2 -> v3 -> v4
 				var p = {
 					coordinates: [
 						[
@@ -83,15 +81,7 @@ var SVGRenderer = function () {
 			}
 			if (polygons.length > 0) {
 				try {
-					// console.log(polygons.map(turf.area))
-					// polygons = polygons.map(e => e.geometry).map(PolyBool.polygonFromGeoJSON);
-					// var segments = PolyBool.segments(polygons[0]);
-					// for (var i = 1; i < polygons.length; i++) {
-					// 	var seg2 = PolyBool.segments(polygons[i]);
-					// 	var comb = PolyBool.combine(segments, seg2);
-					// 	segments = PolyBool.selectUnion(comb);
-					// }
-					// console.log(unioned)
+					// We then union the polygons (faces) so that instead of getting a tesselated face of triangles, we get one flat face that looks good in SVG
 					return {
 						// @ts-ignore
 						verts: PolygonClipping.union(...polygons.map(e => e.coordinates)),
@@ -99,7 +89,6 @@ var SVGRenderer = function () {
 					}
 				}
 				catch (e) {
-					// console.log(polygons)
 					return {
 						verts: polygons,
 						material: grouped[group][0].material
@@ -114,7 +103,7 @@ var SVGRenderer = function () {
 	}
 
 	function pathFromVerts(points) {
-
+		// We then convert the list of points (facE) into a path that we fill by closing and adding a z at the end
 		var pathString = "M";
 		pathString += points[0][0] + ", " + points[0][1] + " ";
 
@@ -148,15 +137,18 @@ var SVGRenderer = function () {
 
 		_renderData = _projector.projectScene(scene, camera, this.sortObjects, this.sortElements);
 		_elements = _renderData.elements;
-		// console.log(_elements, _elements.filter(e => e instanceof RenderableFace))
 
 		var faces = _elements.filter(e => e instanceof RenderableFace);
 		var grouped = groupByColor(faces).filter(e => !!e);
 
 		for (var face of grouped) {
 			let path = pathFromVerts(face.verts);
+			
+			//Since the material carries the color prop, we then set the fill to that color 
 			let style = 'fill:' + face.material.color.getStyle() + ';fill-opacity:' + face.material.opacity + ';';
 			if (this.lineWeight > 0) style += 'stroke:' + this.lineColor + ';' + 'stroke-width:' + this.lineWeight;
+
+			// Add the path to the general SVG node
 			let _svgNode = getPathNode(_pathCount++);
 			_svgNode.setAttribute('d', path);
 			_svgNode.setAttribute('style', style);

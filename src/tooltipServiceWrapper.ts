@@ -71,17 +71,15 @@ class TooltipServiceWrapper implements ITooltipServiceWrapper {
                 return;
             }
 
-            let rootNode = this.rootElement;
-
-            // Multiple following assignments are because browsers only
-            // pick up assigments if they understand the assigned value
-            // and ignore all other case.
-
+            // Don't touch this, i don't think it does anything but i'm not sure
             if (!this.mapHideTooltip[selectedObject.userData._id]) {
                     this.mapHideTooltip[selectedObject.userData._id] = (e) => {
                         // this.hide()
                     };
                 }
+
+
+                // Calculate tooltip position, get the canvas height/width + position, and then use that as offset with object position within the canvas
                 var canvasHalfWidth = renderer.domElement.offsetWidth / 2;
                 var canvasHalfHeight = renderer.domElement.offsetHeight / 2;
 
@@ -90,6 +88,7 @@ class TooltipServiceWrapper implements ITooltipServiceWrapper {
                 tooltipPosition.y = -(tooltipPosition.y * canvasHalfHeight) + canvasHalfHeight + renderer.domElement.offsetTop;
                 let tt = [tooltipPosition.x, tooltipPosition.y]
 
+                //Get data to show
                 let category = this.getRoomProperty(selectedObject.userData);
                 let categoryIndex = this.filterCategory.indexOf(category);
                 let attribute = this.colorCategory[categoryIndex];
@@ -100,28 +99,17 @@ class TooltipServiceWrapper implements ITooltipServiceWrapper {
                     dataItems: [{
                         displayName: this.filterCategoryName.trim(),
                         value: category,
-                        // color: 'test color',
-                        // header: 'Room'
-                    }, !!attribute ? 
+                    }, 
+                    // If we have attribute, then we show it else we only show name
+                    !!attribute ? 
                     {
                         displayName: this.colorCategoryName.replace("First ", "").trim(),
                         value: attribute,
                         color: this.getColor({...selectedObject, properties:selectedObject.userData.properties}),
-                        // header: 'Room'
                     } : null],
                     identities: selectedObject.userData.selectionID ? [selectedObject.userData.selectionID] : [],
                 });
             }
-
-    private getDisplayNameMap(metadata) {
-        let ret = {}
-        metadata.columns.map(column => {
-            Object.keys(column.roles).map(role => {
-                ret[role] = column.displayName
-            });
-        });
-        return ret;
-    }
 
     public hide(immediately = false): void {
         const rootNode = this.rootElement;
@@ -134,29 +122,4 @@ class TooltipServiceWrapper implements ITooltipServiceWrapper {
         });
     }
 
-    private makeTooltipEventArgs<T>(e: any, getTooltips: () => any): TooltipEventArgs<T> {
-
-        let tooltipEventArgs : TooltipEventArgs<T> = null;
-        try {
-            if (e.features && e.features.length > 0) {
-                tooltipEventArgs = {
-                    // Take only the first three element until we figure out how
-                    // to add pager to powerbi native tooltips
-                    data: e.features.slice(0, 3).map(feature => {
-                        return Object.keys(feature.properties).map(prop => {
-                            return {
-                                key: prop,
-                                value: feature.properties[prop]
-                            }
-                        });
-                    }),
-                    coordinates: [e.point.x, e.point.y],
-                    isTouchEvent: false
-                };
-
-            }
-        } finally {
-            return tooltipEventArgs;
-        }
-    }
 }

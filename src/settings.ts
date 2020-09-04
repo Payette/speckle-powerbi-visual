@@ -12,12 +12,14 @@ import powerbi from 'powerbi-visuals-api';
 import ISelectionManager = powerbi.extensibility.ISelectionManager;
 import IColorPalette = powerbi.extensibility.IColorPalette;
 
+// To be honest I'm not 100% sure the difference between SpeckleSettings and ViewerSettings, but if you add something you pass down then make sure to add it in both
+
 export class SpeckleSettings {
     public defaultRoomColor: string = "000000";
     public defaultOpacity: number = 0.75;
     public lineWeight: number = 1;
     public lineColor: string = "000000";
-    public camera: string = "perspective";
+    public camera: string = "orthographic";
     public specklestreamurl: string = "";
     public getColor: (uniqueFICMs:any, obj: any) => any = undefined;
     public getUniqueProps?: (objs:any) => any;
@@ -27,10 +29,11 @@ export class SpeckleSettings {
     public hasHighlights?: any;
     public sortObjs?: any;
     public exportpdf: string = "WebGL";
-    public exportsource: string = "Rhino";
+    public exportsource: string = "Revit";
     public tooltipServiceWrapper: any;
     public events: any;
     public options: any;
+    public storage: any;
 }
 
 export class VisualSettings extends DataViewObjectsParser {
@@ -43,7 +46,7 @@ export class VisualSettings extends DataViewObjectsParser {
 }
 
 export const ViewerSettings = {
-    camera: "perspective",
+    camera: "orthographic",
     showEdges: true,
     edgesThreshold: 1 /* default Threejs thresholdAngle */,
     castShadows: true,
@@ -69,9 +72,10 @@ export const ViewerSettings = {
     hasHighlights: undefined,
     sortObjs: undefined,
     exportpdf: "WebGL",
-    exportsource: "Rhino",
+    exportsource: "Revit",
     lineWeight: 1,
     tooltipServiceWrapper: undefined,
     events: undefined,
-    options: undefined
+    options: undefined,
+    storage: undefined
 }

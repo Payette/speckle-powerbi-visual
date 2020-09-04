@@ -10,6 +10,8 @@ import { ViewerSettings } from "./settings";
 import powerbi from 'powerbi-visuals-api';
 import ISelectionManager = powerbi.extensibility.ISelectionManager;
 import IColorPalette = powerbi.extensibility.IColorPalette;
+
+// Any property that you want to pass down to the Renderer/Visual you have to define in State, VisualSettings, and make sure to set it on every update
 export interface State {
     speckleStreamURL: string,
     width: number,
@@ -32,7 +34,8 @@ export interface State {
     cameraState?: any,
     tooltipServiceWrapper?: any,
     events?: any,
-    options?: any
+    options?: any,
+    storage?: any,
 }
 
 export const initialState: State = {
@@ -40,7 +43,7 @@ export const initialState: State = {
     width: 200,
     height: 200,
     exportpdf: "WebGL",
-    exportsource: 'Rhino'
+    exportsource: 'Revit'
 }
 
 export class SpeckleVisual extends React.Component<{}, State>{
@@ -68,12 +71,9 @@ export class SpeckleVisual extends React.Component<{}, State>{
         SpeckleVisual.updateCallback = null;
     }
 
-    // public resetCamera(){
-    //     this.renderer.resetCamera();
-    // }
-
     componentDidMount() {
-        ViewerSettings.camera = this.state.camera
+        // Since TypeScript is a little weird and treats ViewerSettings as not a variable, we need to set these properties individually
+        ViewerSettings.camera = this.state.camera;
         ViewerSettings.getColor = this.state.getColor;
         ViewerSettings.getUniqueProps = this.state.getUniqueProps;
         ViewerSettings.getSelectionID = this.state.getSelectionID;
@@ -90,9 +90,10 @@ export class SpeckleVisual extends React.Component<{}, State>{
         ViewerSettings.tooltipServiceWrapper = this.state.tooltipServiceWrapper;
         ViewerSettings.events = this.state.events;
         ViewerSettings.options = this.state.options;
-        this.renderer = new SpeckleRenderer({ domObject: this.mount }, ViewerSettings)
-        this.renderer.animate()
-        this.grabSpeckleObjectsFromURLAndUpdate(this.state.speckleStreamURL)
+        ViewerSettings.storage = this.state.storage;
+        this.renderer = new SpeckleRenderer({ domObject: this.mount }, ViewerSettings);
+        this.renderer.animate();
+        this.grabSpeckleObjectsFromURLAndUpdate(this.state.speckleStreamURL);
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -122,32 +123,82 @@ export class SpeckleVisual extends React.Component<{}, State>{
         ViewerSettings.tooltipServiceWrapper = this.state.tooltipServiceWrapper;
         ViewerSettings.events = this.state.events;
         ViewerSettings.options = this.state.options;
-        this.renderer.updateViewerSettings(ViewerSettings)
-        // this.renderer.resetCamera(true);
+        ViewerSettings.storage = this.state.storage;
+        this.renderer.updateViewerSettings(ViewerSettings);
+        // Now we cache objects in grabSpeckleObjects, which speeds this up significantly
         this.renderer.reloadObjects()
     }
 
     grabSpeckleObjectsFromURLAndUpdate(url) {
-        if (url) {
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    let objs = data.resources;
-                    this.renderer.unloadAllObjects()
-                    this.renderer.loadObjects({ objs: objs, zoomExtents: true, firstLoad: true })
-                    this.renderer.zoomExtents(true);
-                })
-                .catch(error => {
-                    console.error("Unable to fetch from URL", error)
-                })
+        // Usually first render / URL hasn't been set, but we try anyway
+        if (!this.state.storage) {
+            if (url) {
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        let objs = data.resources;
+                        this.state.storage.set(url.split('streams/')[1].split('/objects')[0], objs);
+                        this.renderer.unloadAllObjects()
+                        this.renderer.loadObjects({ objs: objs, zoomExtents: true, firstLoad: true })
+                        this.renderer.zoomExtents(true);
+                    })
+                    .catch(error => {
+                        console.error("Unable to fetch from URL", error)
+                    })
+            }
         }
+        // If storage is defined, we try getting the cached objects first
+        else this.state.storage.get(url.split('streams/')[1].split('/objects')[0]).then(objs => {
+
+            // If it exists and its more than 1, we just reload off of that
+            if (objs && Object.keys(objs).length > 0) {
+                this.renderer.unloadAllObjects()
+                this.renderer.loadObjects({ objs: objs, zoomExtents: true, firstLoad: true })
+                this.renderer.zoomExtents(true);
+            }
+
+            // If it doesn't exist/is a blank object we just fetch and set
+            else if (url) {
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        let objs = data.resources;
+                        this.state.storage.set(url.split('streams/')[1].split('/objects')[0], objs);
+                        this.renderer.unloadAllObjects()
+                        this.renderer.loadObjects({ objs: objs, zoomExtents: true, firstLoad: true })
+                        this.renderer.zoomExtents(true);
+                    })
+                    .catch(error => {
+                        console.error("Unable to fetch from URL", error)
+                    })
+            }
+            // Identical to the else if above, the catch() is for when it returns undefined
+        }).catch(() => {
+            if (url) {
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        let objs = data.resources;
+                        this.state.storage.set(url.split('streams/')[1].split('/objects')[0], objs);
+                        this.renderer.unloadAllObjects()
+                        this.renderer.loadObjects({ objs: objs, zoomExtents: true, firstLoad: true })
+                        this.renderer.zoomExtents(true);
+                    })
+                    .catch(error => {
+                        console.error("Unable to fetch from URL", error)
+                    })
+            }
+        })
+
     }
 
     render() {
         const { width, height } = this.state;
         const style: React.CSSProperties = { width: width, height: height };
+        // We add a div on the layer above the rendering one so that when we add/remove renderers it preserves the button
         return <div style={style}>
-            <button style={{position:'absolute', zIndex:1300}} onClick={() => this.renderer.resetCamera()}>Reset Camera</button>
+            {/* We only show the "reset" button if it's not SVG, because if its there it will show in the exported PDF */}
+            {this.state.exportpdf === 'SVG' ? null : <button style={{ position: 'absolute', zIndex: 1300 }} onClick={() => this.renderer.resetCamera()}>Reset Camera</button>}
             <div style={style} className="speckleVisual" ref={ref => (this.mount = ref)}>
             </div>
         </div>
