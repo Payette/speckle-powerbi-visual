@@ -1,0 +1,15 @@
+=== Revit to Speckle to Power BI Speckle Visual ===
+
+Install Dynamo 2.0.4 (in Revit 2018 and 2019, its already installed in 2020)
+Launch Revit 2019
+
+Install Dynamo Packages:
+Lunchbox for Dynamo 2018.7.7 (newer versions don't seem to work)
+
+Install Speckle V1 Plugins for Revit and Rhino
+
+Restart Revit 2019
+
+Load Speckle Convert Revit Rooms to Geometry.dyn in Dynamo and run it,
+
+Send geometries to Speckle
