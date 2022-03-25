@@ -1,7 +1,7 @@
 # Speckle Power BI Visual
 Power BI Custom Visual that displays a 2D view of a V1 Speckle Stream. This plugin was designed to color 2D floorplans generated from Revit and Rhino, via Speckle and Power BI.
 
-![screenshot](/assets/images/Screenshot.JPG)
+![screenshot](/assets/Screenshot.JPG)
 
 ## Revit Workflow
 Note that Speckle V1 did not support Revit Rooms. In order to use this plugin from Revit, first run Dynmo script (see scripts folder) to convert Revit Rooms and Revit Boundaries to geometries, then send these geometries to Speckle (room names will show up in the Speckle property called *parameters.Comments*).
