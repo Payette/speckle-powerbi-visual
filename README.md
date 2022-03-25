@@ -4,9 +4,7 @@ Power BI Custom Visual that displays a 2D view of a V1 Speckle Stream. This plug
 ![screenshot](/assets/Screenshot.JPG)
 
 ## Revit Workflow
-Note that Speckle V1 did not support Revit Rooms. In order to use this plugin from Revit, first run Dynmo script (see scripts folder) to convert Revit Rooms and Revit Boundaries to geometries, then send these geometries to Speckle (room names will show up in the Speckle property called *parameters.Comments*).
-
-Generic Models | 2D-LINE
+Note that Speckle V1 did not support Revit Rooms. In order to use this plugin from Revit, first run Dynmo script (see scripts folder) to convert Revit Rooms and Revit Boundaries to geometries, then send these geometries (Generic Models | 2D-LINE) to Speckle (room names will show up in the Speckle property called *parameters.Comments*).
 
 ## Rhino Workflow
 Rhino does not have a concept of rooms, so first run Grasshopper script (see scripts folder) to associate room names with geometries, then send stream to Speckle (room names will show up in the Speckle property *Room*).
